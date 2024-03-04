@@ -51402,39 +51402,54 @@
                   setChapters(Array.from({ length: bookData.chapters }, (_, i) => i + 1));
               }
           }
-      }, [selectedBook]);
+          console.log('selectedBook:', selectedBook);
+          console.log('chapters:', chapters);
+      }, [selectedBook, chapters]);
       React.useEffect(() => {
           // When a book and a chapter are selected, fetch the verses in that chapter
           if (selectedBook && selectedChapter) {
               dist.getVerse(selectedBook, selectedChapter.toString(), "1-10")
                   .then(response => {
+                  console.log('Response from getVerse (verses):', response);
                   if (response && 'verses' in response && Array.isArray(response.verses)) {
                       setVerses(response.verses);
                   }
               });
           }
-      }, [selectedBook, selectedChapter]);
+          console.log('selectedChapter:', selectedChapter);
+          console.log('verses:', verses);
+      }, [selectedBook, selectedChapter, verses]);
       React.useEffect(() => {
           // When a book, a chapter, and a verse are selected, fetch the text of that verse
           if (selectedBook && selectedChapter && selectedVerse) {
               dist.getVerse(selectedBook, selectedChapter.toString(), selectedVerse)
                   .then(response => {
+                  console.log('Response from getVerse (verse text):', response);
                   if (response && 'passage' in response && typeof response.passage === 'string') {
                       setVerseText(response.passage);
                   }
               });
           }
-      }, [selectedBook, selectedChapter, selectedVerse]);
+          console.log('selectedVerse:', selectedVerse);
+          console.log('verseText:', verseText);
+      }, [selectedBook, selectedChapter, selectedVerse, verseText]);
       return (window.SP_REACT.createElement("div", null,
           page === 0 && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
               window.SP_REACT.createElement("h1", null, "Select a Book"),
-              window.SP_REACT.createElement("ul", null, books.map(book => (window.SP_REACT.createElement("li", { key: book.book, onClick: () => { setSelectedBook(book.book); setPage(1); } }, book.book)))))),
+              window.SP_REACT.createElement("ul", null, books.map(book => (window.SP_REACT.createElement("li", { key: book.book, tabIndex: 0, onKeyDown: (event) => { if (event.key === 'Enter') {
+                      setSelectedBook(book.book);
+                      setPage(1);
+                  } }, onClick: () => { setSelectedBook(book.book); setPage(1); } }, book.book)))))),
           page === 1 && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
               window.SP_REACT.createElement("h1", null, "Select a Chapter"),
-              window.SP_REACT.createElement("ul", null, chapters.map(chapter => (window.SP_REACT.createElement("li", { key: chapter, onClick: () => { setSelectedChapter(chapter); setPage(2); } }, chapter)))))),
+              window.SP_REACT.createElement("ul", null, chapters.map(chapter => (window.SP_REACT.createElement("li", { key: chapter, tabIndex: 0, onKeyDown: (event) => { if (event.key === 'Enter') {
+                      setSelectedChapter(chapter);
+                      setPage(2);
+                  } }, onClick: () => { setSelectedChapter(chapter); setPage(2); } }, chapter)))))),
           page === 2 && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
               window.SP_REACT.createElement("h1", null, "Select a Verse"),
-              window.SP_REACT.createElement("ul", null, verses.map((verse, index) => (window.SP_REACT.createElement("li", { key: index, onClick: () => setSelectedVerse(verse) }, verse)))))),
+              window.SP_REACT.createElement("ul", null, verses.map((verse, index) => (window.SP_REACT.createElement("li", { key: index, tabIndex: 0, onKeyDown: (event) => { if (event.key === 'Enter')
+                      setSelectedVerse(verse); }, onClick: () => setSelectedVerse(verse) }, verse)))))),
           selectedVerse && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
               window.SP_REACT.createElement("h1", null, "Verse Text"),
               window.SP_REACT.createElement("p", null, verseText)))));

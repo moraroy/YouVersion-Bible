@@ -38,31 +38,39 @@ const Content: FC = () => {
         setChapters(Array.from({length: bookData.chapters}, (_, i) => i + 1));
       }
     }
-  }, [selectedBook]);
-
+    console.log('selectedBook:', selectedBook);
+    console.log('chapters:', chapters);
+  }, [selectedBook, chapters]);
+  
   useEffect(() => {
     // When a book and a chapter are selected, fetch the verses in that chapter
     if (selectedBook && selectedChapter) {
       getVerse(selectedBook, selectedChapter.toString(), "1-10")
         .then(response => {
+          console.log('Response from getVerse (verses):', response);
           if (response && 'verses' in response && Array.isArray(response.verses)) {
             setVerses(response.verses);
           }
         });
     }
-  }, [selectedBook, selectedChapter]);
+    console.log('selectedChapter:', selectedChapter);
+    console.log('verses:', verses);
+  }, [selectedBook, selectedChapter, verses]);
   
   useEffect(() => {
     // When a book, a chapter, and a verse are selected, fetch the text of that verse
     if (selectedBook && selectedChapter && selectedVerse) {
       getVerse(selectedBook, selectedChapter.toString(), selectedVerse)
         .then(response => {
+          console.log('Response from getVerse (verse text):', response);
           if (response && 'passage' in response && typeof response.passage === 'string') {
             setVerseText(response.passage);
           }
         });
     }
-  }, [selectedBook, selectedChapter, selectedVerse]);
+    console.log('selectedVerse:', selectedVerse);
+    console.log('verseText:', verseText);
+  }, [selectedBook, selectedChapter, selectedVerse, verseText]);
 
   return (
     <div>
@@ -71,40 +79,40 @@ const Content: FC = () => {
           <h1>Select a Book</h1>
           <ul>
             {books.map(book => (
-              <li key={book.book} onClick={() => {setSelectedBook(book.book); setPage(1);}}>
+              <li key={book.book} tabIndex={0} onKeyDown={(event) => {if (event.key === 'Enter') {setSelectedBook(book.book); setPage(1);}}} onClick={() => {setSelectedBook(book.book); setPage(1);}}>
                 {book.book}
               </li>
             ))}
           </ul>
         </>
       )}
-
+  
       {page === 1 && (
         <>
           <h1>Select a Chapter</h1>
           <ul>
             {chapters.map(chapter => (
-              <li key={chapter} onClick={() => {setSelectedChapter(chapter); setPage(2);}}>
+              <li key={chapter} tabIndex={0} onKeyDown={(event) => {if (event.key === 'Enter') {setSelectedChapter(chapter); setPage(2);}}} onClick={() => {setSelectedChapter(chapter); setPage(2);}}>
                 {chapter}
               </li>
             ))}
           </ul>
         </>
       )}
-
+  
       {page === 2 && (
         <>
           <h1>Select a Verse</h1>
           <ul>
             {verses.map((verse, index) => (
-              <li key={index} onClick={() => setSelectedVerse(verse)}>
+              <li key={index} tabIndex={0} onKeyDown={(event) => {if (event.key === 'Enter') setSelectedVerse(verse);}} onClick={() => setSelectedVerse(verse)}>
                 {verse}
               </li>
             ))}
           </ul>
         </>
       )}
-
+  
       {selectedVerse && (
         <>
           <h1>Verse Text</h1>

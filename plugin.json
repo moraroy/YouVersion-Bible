@@ -1,7 +1,7 @@
 {
-  "name": "Example Plugin",
-  "author": "John Doe",
-  "flags": ["debug", "_root"],
+  "name": "YouVersion",
+  "author": "moraroy",
+  "flags": ["debug", "template"],
   "publish": {
     "tags": ["template", "root"],
     "description": "Decky example plugin.",

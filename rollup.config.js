@@ -12,12 +12,12 @@ export default defineConfig({
   input: './src/index.tsx',
   plugins: [
     commonjs(),
+    json(),
     typescript({
       include: ['src/**/*.ts', 'src/**/*.tsx', 'node_modules/@glowstudent/youversion/**/*.ts'],
       exclude: ['node_modules/!(glowstudent)/**/*.ts']
     }),
     nodeResolve(),
-    json(),
     replace({
       preventAssignment: false,
       'process.env.NODE_ENV': JSON.stringify('production'),

@@ -1,5 +1,5 @@
 import { ServerAPI } from "decky-frontend-lib";
-const YouVersion = require("@glowstudent/youversion");
+import { getVerseOfTheDay } from "@glowstudent/youversion";
 
 export class notify {
     private static serverAPI: ServerAPI;
@@ -25,8 +25,10 @@ export class notify {
     }
     static async toastVerseOfTheDay(): Promise<void> {
       try {
-        const verseOfTheDay = await YouVersion.getVerseOfTheDay();
-        this.toast(verseOfTheDay.citation, verseOfTheDay.passage);
+        const verseOfTheDay = await getVerseOfTheDay();
+        if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
+          this.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
+        }
       } catch (error) {
         console.error("Failed to fetch the verse of the day:", error);
       }

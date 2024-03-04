@@ -4,51 +4,62 @@ import {
   staticClasses,
 } from "decky-frontend-lib";
 import { FaBible } from "react-icons/fa";
-const YouVersion = require("@glowstudent/youversion");
+import { getVerseOfTheDay, getVerse } from "@glowstudent/youversion";
 import notify from './notify';
+import booksData from './books.json';
 
 // Display the verse of the day as a toast notification when the plugin is loaded
 (async () => {
   try {
-    const verseOfTheDay = await YouVersion.getVerseOfTheDay();
-    notify.toast('Verse of the Day', verseOfTheDay.passage);
+    const verseOfTheDay = await getVerseOfTheDay();
+    if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
+      notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
+    }
   } catch (error) {
     console.error("Failed to fetch the verse of the day:", error);
   }
 })();
 
 const Content: FC = () => {
-  const [books, setBooks] = useState<string[]>([]);
+  const [books] = useState(booksData.books);
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
-  const [chapters, setChapters] = useState([]);
-  const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
-  const [verses, setVerses] = useState([]);
+  const [chapters, setChapters] = useState<number[]>([]);
+  const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
+  const [verses, setVerses] = useState<string[]>([]);
   const [selectedVerse, setSelectedVerse] = useState<string | null>(null);
   const [verseText, setVerseText] = useState("");
 
   useEffect(() => {
-    // Fetch the list of books when the component is mounted
-    setBooks(Object.keys(YouVersion.books));
-  }, []);
-
-  useEffect(() => {
     // When a book is selected, fetch the chapters in that book
     if (selectedBook) {
-      YouVersion.getChapters(selectedBook).then(setChapters);
+      const bookData = books.find(book => book.book === selectedBook);
+      if (bookData) {
+        setChapters(Array.from({length: bookData.chapters}, (_, i) => i + 1));
+      }
     }
   }, [selectedBook]);
 
   useEffect(() => {
-    // When a chapter is selected, fetch the verses in that chapter
+    // When a book and a chapter are selected, fetch the verses in that chapter
     if (selectedBook && selectedChapter) {
-      YouVersion.getVerses(selectedBook, selectedChapter).then(setVerses);
+      getVerse(selectedBook, selectedChapter.toString(), "1-10")
+        .then(response => {
+          if (response && 'verses' in response && Array.isArray(response.verses)) {
+            setVerses(response.verses);
+          }
+        });
     }
   }, [selectedBook, selectedChapter]);
-
+  
   useEffect(() => {
-    // When a verse is selected, fetch the text of that verse
+    // When a book, a chapter, and a verse are selected, fetch the text of that verse
     if (selectedBook && selectedChapter && selectedVerse) {
-      YouVersion.getVerse(selectedBook, selectedChapter, selectedVerse).then(setVerseText);
+      getVerse(selectedBook, selectedChapter.toString(), selectedVerse)
+        .then(response => {
+          if (response && 'passage' in response && typeof response.passage === 'string') {
+            setVerseText(response.passage);
+          }
+        });
     }
   }, [selectedBook, selectedChapter, selectedVerse]);
 
@@ -57,8 +68,8 @@ const Content: FC = () => {
       <h1>Select a Book</h1>
       <ul>
         {books.map(book => (
-          <li key={book} onClick={() => setSelectedBook(book)}>
-            {book}
+          <li key={book.book} onClick={() => setSelectedBook(book.book)}>
+            {book.book}
           </li>
         ))}
       </ul>
@@ -80,8 +91,8 @@ const Content: FC = () => {
         <>
           <h1>Select a Verse</h1>
           <ul>
-            {verses.map(verse => (
-              <li key={verse} onClick={() => setSelectedVerse(verse)}>
+            {verses.map((verse, index) => (
+              <li key={index} onClick={() => setSelectedVerse(verse)}>
                 {verse}
               </li>
             ))}

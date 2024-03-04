@@ -2,7 +2,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
-import typescript from '@rollup/plugin-typescript';
+import typescript from 'rollup-plugin-typescript2';
 import { defineConfig } from 'rollup';
 import importAssets from 'rollup-plugin-import-assets';
 
@@ -12,8 +12,11 @@ export default defineConfig({
   input: './src/index.tsx',
   plugins: [
     commonjs(),
+    typescript({
+      include: ['src/**/*.ts', 'src/**/*.tsx', 'node_modules/@glowstudent/youversion/**/*.ts'],
+      exclude: ['node_modules/!(glowstudent)/**/*.ts']
+    }),
     nodeResolve(),
-    typescript(),
     json(),
     replace({
       preventAssignment: false,

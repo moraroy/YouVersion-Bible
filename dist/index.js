@@ -51393,6 +51393,7 @@
       const [verses, setVerses] = React.useState([]);
       const [selectedVerse, setSelectedVerse] = React.useState(null);
       const [verseText, setVerseText] = React.useState("");
+      const [page, setPage] = React.useState(0);
       React.useEffect(() => {
           // When a book is selected, fetch the chapters in that book
           if (selectedBook) {
@@ -51425,12 +51426,13 @@
           }
       }, [selectedBook, selectedChapter, selectedVerse]);
       return (window.SP_REACT.createElement("div", null,
-          window.SP_REACT.createElement("h1", null, "Select a Book"),
-          window.SP_REACT.createElement("ul", null, books.map(book => (window.SP_REACT.createElement("li", { key: book.book, onClick: () => setSelectedBook(book.book) }, book.book)))),
-          selectedBook && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
+          page === 0 && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
+              window.SP_REACT.createElement("h1", null, "Select a Book"),
+              window.SP_REACT.createElement("ul", null, books.map(book => (window.SP_REACT.createElement("li", { key: book.book, onClick: () => { setSelectedBook(book.book); setPage(1); } }, book.book)))))),
+          page === 1 && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
               window.SP_REACT.createElement("h1", null, "Select a Chapter"),
-              window.SP_REACT.createElement("ul", null, chapters.map(chapter => (window.SP_REACT.createElement("li", { key: chapter, onClick: () => setSelectedChapter(chapter) }, chapter)))))),
-          selectedChapter && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
+              window.SP_REACT.createElement("ul", null, chapters.map(chapter => (window.SP_REACT.createElement("li", { key: chapter, onClick: () => { setSelectedChapter(chapter); setPage(2); } }, chapter)))))),
+          page === 2 && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
               window.SP_REACT.createElement("h1", null, "Select a Verse"),
               window.SP_REACT.createElement("ul", null, verses.map((verse, index) => (window.SP_REACT.createElement("li", { key: index, onClick: () => setSelectedVerse(verse) }, verse)))))),
           selectedVerse && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,

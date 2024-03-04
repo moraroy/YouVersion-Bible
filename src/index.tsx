@@ -28,6 +28,7 @@ const Content: FC = () => {
   const [verses, setVerses] = useState<string[]>([]);
   const [selectedVerse, setSelectedVerse] = useState<string | null>(null);
   const [verseText, setVerseText] = useState("");
+  const [page, setPage] = useState(0);
 
   useEffect(() => {
     // When a book is selected, fetch the chapters in that book
@@ -65,21 +66,25 @@ const Content: FC = () => {
 
   return (
     <div>
-      <h1>Select a Book</h1>
-      <ul>
-        {books.map(book => (
-          <li key={book.book} onClick={() => setSelectedBook(book.book)}>
-            {book.book}
-          </li>
-        ))}
-      </ul>
+      {page === 0 && (
+        <>
+          <h1>Select a Book</h1>
+          <ul>
+            {books.map(book => (
+              <li key={book.book} onClick={() => {setSelectedBook(book.book); setPage(1);}}>
+                {book.book}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
 
-      {selectedBook && (
+      {page === 1 && (
         <>
           <h1>Select a Chapter</h1>
           <ul>
             {chapters.map(chapter => (
-              <li key={chapter} onClick={() => setSelectedChapter(chapter)}>
+              <li key={chapter} onClick={() => {setSelectedChapter(chapter); setPage(2);}}>
                 {chapter}
               </li>
             ))}
@@ -87,7 +92,7 @@ const Content: FC = () => {
         </>
       )}
 
-      {selectedChapter && (
+      {page === 2 && (
         <>
           <h1>Select a Verse</h1>
           <ul>

@@ -17,7 +17,9 @@ export default defineConfig({
       include: ['src/**/*.ts', 'src/**/*.tsx', 'node_modules/@glowstudent/youversion/**/*.ts'],
       exclude: ['node_modules/!(glowstudent)/**/*.ts']
     }),
-    nodeResolve(),
+    nodeResolve({
+      preferBuiltins: true,
+    }),
     replace({
       preventAssignment: false,
       'process.env.NODE_ENV': JSON.stringify('production'),

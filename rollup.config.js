@@ -5,6 +5,7 @@ import replace from '@rollup/plugin-replace';
 import typescript from 'rollup-plugin-typescript2';
 import { defineConfig } from 'rollup';
 import importAssets from 'rollup-plugin-import-assets';
+import polyfillNode from 'rollup-plugin-polyfill-node';
 
 import { name } from "./plugin.json";
 
@@ -13,6 +14,7 @@ export default defineConfig({
   plugins: [
     commonjs(),
     json(),
+    polyfillNode(),
     typescript({
       include: ['src/**/*.ts', 'src/**/*.tsx', 'node_modules/@glowstudent/youversion/**/*.ts'],
       exclude: ['node_modules/!(glowstudent)/**/*.ts']
@@ -35,7 +37,17 @@ export default defineConfig({
     globals: {
       react: "SP_REACT",
       "react-dom": "SP_REACTDOM",
-      "decky-frontend-lib": "DFL"
+      "decky-frontend-lib": "DFL",
+      'util': 'util',
+      'stream': 'stream',
+      'path': 'path',
+      'http': 'http',
+      'https': 'https',
+      'url': 'url',
+      'fs': 'fs',
+      'assert': 'assert',
+      'zlib': 'zlib',
+      'events': 'events'
     },
     format: 'iife',
     exports: 'default',

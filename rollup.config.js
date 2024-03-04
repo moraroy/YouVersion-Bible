@@ -5,7 +5,6 @@ import replace from '@rollup/plugin-replace';
 import typescript from 'rollup-plugin-typescript2';
 import { defineConfig } from 'rollup';
 import importAssets from 'rollup-plugin-import-assets';
-import polyfillNode from 'rollup-plugin-polyfill-node';
 
 import { name } from "./plugin.json";
 
@@ -14,7 +13,6 @@ export default defineConfig({
   plugins: [
     commonjs(),
     json(),
-    polyfillNode(),
     typescript({
       include: ['src/**/*.ts', 'src/**/*.tsx', 'node_modules/@glowstudent/youversion/**/*.ts'],
       exclude: ['node_modules/!(glowstudent)/**/*.ts']

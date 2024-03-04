@@ -37101,4 +37101,4 @@
 
   return index;
 
-})(SP_REACT, DFL, require$$1, require$$7, require$$1$1, require$$3$1, require$$4, require$$0$2, require$$6, require$$4$1, require$$6$1, require$$8);
+})(SP_REACT, DFL, util, stream, path, http, https, url, fs, assert, zlib, events);

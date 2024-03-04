@@ -33,7 +33,17 @@ export default defineConfig({
     globals: {
       react: "SP_REACT",
       "react-dom": "SP_REACTDOM",
-      "decky-frontend-lib": "DFL"
+      "decky-frontend-lib": "DFL",
+      'util': 'util',
+      'stream': 'stream',
+      'path': 'path',
+      'http': 'http',
+      'https': 'https',
+      'url': 'url',
+      'fs': 'fs',
+      'assert': 'assert',
+      'zlib': 'zlib',
+      'events': 'events'
     },
     format: 'iife',
     exports: 'default',

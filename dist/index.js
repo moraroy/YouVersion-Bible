@@ -50246,7 +50246,9 @@
   const axios_1$1 = __importDefault$1(axios_1$2);
   const cheerio$1 = __importStar$1(lib$9);
   async function getVerseOfTheDay() {
-      const URL = "https://www.bible.com/verse-of-the-day";
+      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+      const targetUrl = "https://www.bible.com/verse-of-the-day";
+      const URL = proxyUrl + targetUrl;
       try {
           const { data } = await axios_1$1.default.get(URL);
           const $ = cheerio$1.load(data);

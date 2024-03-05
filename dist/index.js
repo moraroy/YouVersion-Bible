@@ -51430,13 +51430,17 @@
       React.useEffect(() => {
           // When a book, a chapter, and a verse are selected, fetch the text of that verse
           if (typeof selectedBook === 'string' && selectedChapter && selectedVerse) {
-              dist.getVerse(serverAPI, selectedBook, selectedChapter.toString(), selectedVerse)
-                  .then((response) => {
-                  console.log('Response from getVerse (verse text):', response);
-                  if (response && 'passage' in response && typeof response.passage === 'string') {
-                      setVerseText(response.passage);
+              (async () => {
+                  try {
+                      let verse = await dist.getVerse(serverAPI, selectedBook, selectedChapter.toString(), selectedVerse.toString());
+                      if (verse && 'passage' in verse && typeof verse.passage === 'string') {
+                          setVerseText(verse.passage);
+                      }
                   }
-              });
+                  catch (error) {
+                      console.error("Failed to fetch the verse:", error);
+                  }
+              })();
           }
           console.log('selectedVerse:', selectedVerse);
           console.log('verseText:', verseText);

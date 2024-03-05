@@ -9,6 +9,7 @@ import { getVerseOfTheDay, getVerse } from "@glowstudent/youversion";
 import notify from './notify';
 import booksData from './books.json';
 
+
 interface VerseResponse {
   verses?: string[];
   passage?: string;
@@ -69,19 +70,22 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   }, [selectedBook, selectedChapter]);
   
   useEffect(() => {
-    // When a book, a chapter, and a verse are selected, fetch the text of that verse
-    if (typeof selectedBook === 'string' && selectedChapter && selectedVerse) {
-      getVerse(serverAPI, selectedBook, selectedChapter.toString(), selectedVerse)
-        .then((response: VerseResponse) => {
-          console.log('Response from getVerse (verse text):', response);
-          if (response && 'passage' in response && typeof response.passage === 'string') {
-            setVerseText(response.passage);
-          }
-        });
-    }
-    console.log('selectedVerse:', selectedVerse);
-    console.log('verseText:', verseText);
-  }, [selectedBook, selectedChapter, selectedVerse]);
+  // When a book, a chapter, and a verse are selected, fetch the text of that verse
+  if (typeof selectedBook === 'string' && selectedChapter && selectedVerse) {
+    (async () => {
+      try {
+        let verse = await getVerse(serverAPI, selectedBook, selectedChapter.toString(), selectedVerse.toString());
+        if (verse && 'passage' in verse && typeof verse.passage === 'string') {
+          setVerseText(verse.passage);
+        }
+      } catch (error) {
+        console.error("Failed to fetch the verse:", error);
+      }
+    })();
+  }
+  console.log('selectedVerse:', selectedVerse);
+  console.log('verseText:', verseText);
+}, [selectedBook, selectedChapter, selectedVerse]);
 
 
 

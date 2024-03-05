@@ -1,4 +1,4 @@
-(function (React, deckyFrontendLib) {
+(function (deckyFrontendLib, React) {
   'use strict';
 
   function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -50894,7 +50894,7 @@
       }
       static async toastVerseOfTheDay() {
           try {
-              const verseOfTheDay = await dist.getVerseOfTheDay();
+              const verseOfTheDay = await dist.getVerseOfTheDay(this.serverAPI);
               if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
                   this.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
               }
@@ -51373,19 +51373,7 @@
   	books: books
   };
 
-  // Display the verse of the day as a toast notification when the plugin is loaded
-  (async () => {
-      try {
-          const verseOfTheDay = await dist.getVerseOfTheDay();
-          if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
-              notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
-          }
-      }
-      catch (error) {
-          console.error("Failed to fetch the verse of the day:", error);
-      }
-  })();
-  const Content = () => {
+  const Content = ({ serverAPI }) => {
       const [books] = React.useState(booksData.books);
       const [selectedBook, setSelectedBook] = React.useState(null);
       const [chapters, setChapters] = React.useState([]);
@@ -51394,6 +51382,20 @@
       const [selectedVerse, setSelectedVerse] = React.useState(null);
       const [verseText, setVerseText] = React.useState("");
       const [page, setPage] = React.useState(0);
+      React.useEffect(() => {
+          // Display the verse of the day as a toast notification when the plugin is loaded
+          (async () => {
+              try {
+                  const verseOfTheDay = await dist.getVerseOfTheDay(serverAPI);
+                  if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
+                      notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
+                  }
+              }
+              catch (error) {
+                  console.error("Failed to fetch the verse of the day:", error);
+              }
+          })();
+      }, []); // Empty dependency array means this effect runs once on component mount
       React.useEffect(() => {
           // When a book is selected, fetch the chapters in that book
           if (selectedBook) {
@@ -51408,7 +51410,7 @@
       React.useEffect(() => {
           // When a book and a chapter are selected, fetch the verses in that chapter
           if (selectedBook && selectedChapter) {
-              dist.getVerse(selectedBook, selectedChapter.toString(), "1-10")
+              dist.getVerse(serverAPI, selectedBook, selectedChapter.toString(), "1-10")
                   .then(response => {
                   console.log('Response from getVerse (verses):', response);
                   if (response && 'verses' in response && Array.isArray(response.verses)) {
@@ -51422,7 +51424,7 @@
       React.useEffect(() => {
           // When a book, a chapter, and a verse are selected, fetch the text of that verse
           if (selectedBook && selectedChapter && selectedVerse) {
-              dist.getVerse(selectedBook, selectedChapter.toString(), selectedVerse)
+              dist.getVerse(serverAPI, selectedBook, selectedChapter.toString(), selectedVerse)
                   .then(response => {
                   console.log('Response from getVerse (verse text):', response);
                   if (response && 'passage' in response && typeof response.passage === 'string') {
@@ -51454,14 +51456,14 @@
               window.SP_REACT.createElement("h1", null, "Verse Text"),
               window.SP_REACT.createElement("p", null, verseText)))));
   };
-  var index = deckyFrontendLib.definePlugin(() => {
+  var index = deckyFrontendLib.definePlugin((serverApi) => {
       return {
           title: window.SP_REACT.createElement("div", { className: deckyFrontendLib.staticClasses.Title }, "YouVersion"),
-          content: window.SP_REACT.createElement(Content, null),
+          content: window.SP_REACT.createElement(Content, { serverAPI: serverApi }),
           icon: window.SP_REACT.createElement(FaBible, null),
       };
   });
 
   return index;
 
-})(SP_REACT, DFL);
+})(DFL, SP_REACT);

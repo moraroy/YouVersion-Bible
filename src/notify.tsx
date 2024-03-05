@@ -25,7 +25,7 @@ export class notify {
     }
     static async toastVerseOfTheDay(): Promise<void> {
       try {
-        const verseOfTheDay = await getVerseOfTheDay();
+        const verseOfTheDay = await getVerseOfTheDay(this.serverAPI);
         if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
           this.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
         }

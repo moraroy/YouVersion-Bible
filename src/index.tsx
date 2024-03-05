@@ -1,26 +1,16 @@
-import { useEffect, useState, FC } from 'react';
 import {
   definePlugin,
+  ServerAPI,
   staticClasses,
 } from "decky-frontend-lib";
+import { useEffect, useState, VFC } from "react";
 import { FaBible } from "react-icons/fa";
 import { getVerseOfTheDay, getVerse } from "@glowstudent/youversion";
 import notify from './notify';
 import booksData from './books.json';
 
-// Display the verse of the day as a toast notification when the plugin is loaded
-(async () => {
-  try {
-    const verseOfTheDay = await getVerseOfTheDay();
-    if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
-      notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
-    }
-  } catch (error) {
-    console.error("Failed to fetch the verse of the day:", error);
-  }
-})();
 
-const Content: FC = () => {
+const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   const [books] = useState(booksData.books);
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [chapters, setChapters] = useState<number[]>([]);
@@ -29,6 +19,20 @@ const Content: FC = () => {
   const [selectedVerse, setSelectedVerse] = useState<string | null>(null);
   const [verseText, setVerseText] = useState("");
   const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    // Display the verse of the day as a toast notification when the plugin is loaded
+    (async () => {
+      try {
+        const verseOfTheDay = await getVerseOfTheDay(serverAPI);
+        if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
+          notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
+        }
+      } catch (error) {
+        console.error("Failed to fetch the verse of the day:", error);
+      }
+    })();
+  }, []); // Empty dependency array means this effect runs once on component mount
 
   useEffect(() => {
     // When a book is selected, fetch the chapters in that book
@@ -45,7 +49,7 @@ const Content: FC = () => {
   useEffect(() => {
     // When a book and a chapter are selected, fetch the verses in that chapter
     if (selectedBook && selectedChapter) {
-      getVerse(selectedBook, selectedChapter.toString(), "1-10")
+      getVerse(serverAPI, selectedBook, selectedChapter.toString(), "1-10")
         .then(response => {
           console.log('Response from getVerse (verses):', response);
           if (response && 'verses' in response && Array.isArray(response.verses)) {
@@ -60,7 +64,7 @@ const Content: FC = () => {
   useEffect(() => {
     // When a book, a chapter, and a verse are selected, fetch the text of that verse
     if (selectedBook && selectedChapter && selectedVerse) {
-      getVerse(selectedBook, selectedChapter.toString(), selectedVerse)
+      getVerse(serverAPI, selectedBook, selectedChapter.toString(), selectedVerse)
         .then(response => {
           console.log('Response from getVerse (verse text):', response);
           if (response && 'passage' in response && typeof response.passage === 'string') {
@@ -71,6 +75,7 @@ const Content: FC = () => {
     console.log('selectedVerse:', selectedVerse);
     console.log('verseText:', verseText);
   }, [selectedBook, selectedChapter, selectedVerse, verseText]);
+
 
   return (
     <div>
@@ -123,10 +128,10 @@ const Content: FC = () => {
   );
 };
 
-export default definePlugin(() => {
+export default definePlugin((serverApi: ServerAPI) => {
   return {
     title: <div className={staticClasses.Title}>YouVersion</div>,
-    content: <Content />,
+    content: <Content serverAPI={serverApi} />,
     icon: <FaBible />,
   };
 });

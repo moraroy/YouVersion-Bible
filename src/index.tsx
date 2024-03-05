@@ -92,7 +92,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <h1>Select a Book</h1>
           <ul>
             {books.map(book => (
-              <li key={book.book} tabIndex={0} onKeyDown={(event) => {if (event.key === 'Enter') {setSelectedBook(book.book); setPage(1);}}} onClick={() => {setSelectedBook(book.book); setPage(1);}}>
+              <li key={book.book} tabIndex={0} onKeyDown={(event) => {if (event.key === 'Enter') {setSelectedBook(book.book.toString()); setPage(1);}}} onClick={() => {setSelectedBook(book.book.toString()); setPage(1);}}>
                 {book.book}
               </li>
             ))}

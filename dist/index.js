@@ -51445,9 +51445,9 @@
           page === 0 && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
               window.SP_REACT.createElement("h1", null, "Select a Book"),
               window.SP_REACT.createElement("ul", null, books.map(book => (window.SP_REACT.createElement("li", { key: book.book, tabIndex: 0, onKeyDown: (event) => { if (event.key === 'Enter') {
-                      setSelectedBook(book.book);
+                      setSelectedBook(book.book.toString());
                       setPage(1);
-                  } }, onClick: () => { setSelectedBook(book.book); setPage(1); } }, book.book)))))),
+                  } }, onClick: () => { setSelectedBook(book.book.toString()); setPage(1); } }, book.book)))))),
           page === 1 && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
               window.SP_REACT.createElement("h1", null, "Select a Chapter"),
               window.SP_REACT.createElement("ul", null, chapters.map(chapter => (window.SP_REACT.createElement("li", { key: chapter, tabIndex: 0, onKeyDown: (event) => { if (event.key === 'Enter') {

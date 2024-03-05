@@ -55,7 +55,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 
   useEffect(() => {
     // When a book and a chapter are selected, fetch the verses in that chapter
-    if (selectedBook && selectedChapter) {
+    if (typeof selectedBook === 'string' && selectedChapter) {
       getVerse(serverAPI, selectedBook, selectedChapter.toString(), "1-10")
         .then((response: VerseResponse) => {
           console.log('Response from getVerse (verses):', response);
@@ -70,7 +70,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 
   useEffect(() => {
     // When a book, a chapter, and a verse are selected, fetch the text of that verse
-    if (selectedBook && selectedChapter && selectedVerse) {
+    if (typeof selectedBook === 'string' && selectedChapter && selectedVerse) {
       getVerse(serverAPI, selectedBook, selectedChapter.toString(), selectedVerse)
         .then((response: VerseResponse) => {
           console.log('Response from getVerse (verse text):', response);
@@ -82,6 +82,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     console.log('selectedVerse:', selectedVerse);
     console.log('verseText:', verseText);
   }, [selectedBook, selectedChapter, selectedVerse]);
+
 
 
   return (

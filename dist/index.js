@@ -51415,7 +51415,7 @@
       }, [selectedBook]);
       React.useEffect(() => {
           // When a book and a chapter are selected, fetch the verses in that chapter
-          if (selectedBook && selectedChapter) {
+          if (typeof selectedBook === 'string' && selectedChapter) {
               dist.getVerse(serverAPI, selectedBook, selectedChapter.toString(), "1-10")
                   .then((response) => {
                   console.log('Response from getVerse (verses):', response);
@@ -51429,7 +51429,7 @@
       }, [selectedBook, selectedChapter]);
       React.useEffect(() => {
           // When a book, a chapter, and a verse are selected, fetch the text of that verse
-          if (selectedBook && selectedChapter && selectedVerse) {
+          if (typeof selectedBook === 'string' && selectedChapter && selectedVerse) {
               dist.getVerse(serverAPI, selectedBook, selectedChapter.toString(), selectedVerse)
                   .then((response) => {
                   console.log('Response from getVerse (verse text):', response);

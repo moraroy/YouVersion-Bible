@@ -51387,6 +51387,8 @@
       const [verseText, setVerseText] = React.useState("");
       const [page, setPage] = React.useState(0);
       React.useEffect(() => {
+          // Set the serverAPI in the notify class
+          notify.setServer(serverAPI);
           // Display the verse of the day as a toast notification when the plugin is loaded
           (async () => {
               try {
@@ -51399,7 +51401,7 @@
                   console.error("Failed to fetch the verse of the day:", error);
               }
           })();
-      }, []); // Empty dependency array means this effect runs once on component mount
+      }, []);
       React.useEffect(() => {
           // When a book is selected, fetch the chapters in that book
           if (selectedBook) {
@@ -51410,12 +51412,12 @@
           }
           console.log('selectedBook:', selectedBook);
           console.log('chapters:', chapters);
-      }, [selectedBook, chapters]);
+      }, [selectedBook]);
       React.useEffect(() => {
           // When a book and a chapter are selected, fetch the verses in that chapter
           if (selectedBook && selectedChapter) {
               dist.getVerse(serverAPI, selectedBook, selectedChapter.toString(), "1-10")
-                  .then(response => {
+                  .then((response) => {
                   console.log('Response from getVerse (verses):', response);
                   if (response && 'verses' in response && Array.isArray(response.verses)) {
                       setVerses(response.verses);
@@ -51424,12 +51426,12 @@
           }
           console.log('selectedChapter:', selectedChapter);
           console.log('verses:', verses);
-      }, [selectedBook, selectedChapter, verses]);
+      }, [selectedBook, selectedChapter]);
       React.useEffect(() => {
           // When a book, a chapter, and a verse are selected, fetch the text of that verse
           if (selectedBook && selectedChapter && selectedVerse) {
               dist.getVerse(serverAPI, selectedBook, selectedChapter.toString(), selectedVerse)
-                  .then(response => {
+                  .then((response) => {
                   console.log('Response from getVerse (verse text):', response);
                   if (response && 'passage' in response && typeof response.passage === 'string') {
                       setVerseText(response.passage);
@@ -51438,7 +51440,7 @@
           }
           console.log('selectedVerse:', selectedVerse);
           console.log('verseText:', verseText);
-      }, [selectedBook, selectedChapter, selectedVerse, verseText]);
+      }, [selectedBook, selectedChapter, selectedVerse]);
       return (window.SP_REACT.createElement("div", null,
           page === 0 && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
               window.SP_REACT.createElement("h1", null, "Select a Book"),

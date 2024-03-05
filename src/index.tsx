@@ -9,6 +9,10 @@ import { getVerseOfTheDay, getVerse } from "@glowstudent/youversion";
 import notify from './notify';
 import booksData from './books.json';
 
+interface VerseResponse {
+  verses?: string[];
+  passage?: string;
+}
 
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   const [books] = useState(booksData.books);
@@ -21,6 +25,9 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   const [page, setPage] = useState(0);
 
   useEffect(() => {
+    // Set the serverAPI in the notify class
+    notify.setServer(serverAPI);
+
     // Display the verse of the day as a toast notification when the plugin is loaded
     (async () => {
       try {
@@ -32,7 +39,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         console.error("Failed to fetch the verse of the day:", error);
       }
     })();
-  }, []); // Empty dependency array means this effect runs once on component mount
+  }, []);
 
   useEffect(() => {
     // When a book is selected, fetch the chapters in that book
@@ -44,13 +51,13 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     }
     console.log('selectedBook:', selectedBook);
     console.log('chapters:', chapters);
-  }, [selectedBook, chapters]);
-  
+  }, [selectedBook]);
+
   useEffect(() => {
     // When a book and a chapter are selected, fetch the verses in that chapter
     if (selectedBook && selectedChapter) {
       getVerse(serverAPI, selectedBook, selectedChapter.toString(), "1-10")
-        .then(response => {
+        .then((response: VerseResponse) => {
           console.log('Response from getVerse (verses):', response);
           if (response && 'verses' in response && Array.isArray(response.verses)) {
             setVerses(response.verses);
@@ -59,13 +66,13 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     }
     console.log('selectedChapter:', selectedChapter);
     console.log('verses:', verses);
-  }, [selectedBook, selectedChapter, verses]);
-  
+  }, [selectedBook, selectedChapter]);
+
   useEffect(() => {
     // When a book, a chapter, and a verse are selected, fetch the text of that verse
     if (selectedBook && selectedChapter && selectedVerse) {
       getVerse(serverAPI, selectedBook, selectedChapter.toString(), selectedVerse)
-        .then(response => {
+        .then((response: VerseResponse) => {
           console.log('Response from getVerse (verse text):', response);
           if (response && 'passage' in response && typeof response.passage === 'string') {
             setVerseText(response.passage);
@@ -74,7 +81,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     }
     console.log('selectedVerse:', selectedVerse);
     console.log('verseText:', verseText);
-  }, [selectedBook, selectedChapter, selectedVerse, verseText]);
+  }, [selectedBook, selectedChapter, selectedVerse]);
 
 
   return (

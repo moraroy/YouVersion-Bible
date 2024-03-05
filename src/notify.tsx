@@ -3,27 +3,34 @@ import { getVerseOfTheDay } from "@glowstudent/youversion";
 
 export class notify {
     private static serverAPI: ServerAPI;
-    /**
-     * Sets the interop's severAPI.
-     * @param serv The ServerAPI for the interop to use.
-     */
+
     static setServer(serv: ServerAPI): void {
       this.serverAPI = serv;
     }
+
     static toast(title: string, message: string): void {
-      return (() => {
-        try {
-          return this.serverAPI.toaster.toast({
-            title: title,
-            body: message,
-            duration: 8000,
-          });
-        } catch (e) {
-          console.log("Toaster Error", e);
-        }
-      })();
+      if (!this.serverAPI || !this.serverAPI.toaster) {
+        console.error("serverAPI or toaster is not defined");
+        return;
+      }
+
+      try {
+        this.serverAPI.toaster.toast({
+          title: title,
+          body: message,
+          duration: 8000,
+        });
+      } catch (e) {
+        console.error("Toaster Error", e);
+      }
     }
+
     static async toastVerseOfTheDay(): Promise<void> {
+      if (!this.serverAPI) {
+        console.error("serverAPI is not defined");
+        return;
+      }
+
       try {
         const verseOfTheDay = await getVerseOfTheDay(this.serverAPI);
         if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
@@ -34,4 +41,5 @@ export class notify {
       }
     }
 }
+
 export default notify;

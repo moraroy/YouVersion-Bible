@@ -51386,6 +51386,7 @@
       const [selectedVerse, setSelectedVerse] = React.useState(null);
       const [verseText, setVerseText] = React.useState("");
       const [page, setPage] = React.useState(0);
+      const [verseOfTheDay, setVerseOfTheDay] = React.useState(null);
       React.useEffect(() => {
           // Set the serverAPI in the notify class
           notify.setServer(serverAPI);
@@ -51395,6 +51396,8 @@
                   const verseOfTheDay = await dist.getVerseOfTheDay(serverAPI);
                   if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
                       notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
+                      // Also set the verse of the day in the state
+                      setVerseOfTheDay({ citation: verseOfTheDay.citation.toString(), passage: verseOfTheDay.passage.toString() });
                   }
               }
               catch (error) {
@@ -51446,6 +51449,10 @@
           console.log('verseText:', verseText);
       }, [selectedBook, selectedChapter, selectedVerse]);
       return (window.SP_REACT.createElement("div", null,
+          verseOfTheDay && (window.SP_REACT.createElement("div", null,
+              window.SP_REACT.createElement("h2", null, "Verse of the Day"),
+              window.SP_REACT.createElement("p", null, verseOfTheDay.citation),
+              window.SP_REACT.createElement("p", null, verseOfTheDay.passage))),
           page === 0 && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
               window.SP_REACT.createElement("h1", null, "Select a Book"),
               window.SP_REACT.createElement("ul", null, books.map(book => (window.SP_REACT.createElement("li", { key: book.book, tabIndex: 0, onKeyDown: (event) => { if (event.key === 'Enter') {

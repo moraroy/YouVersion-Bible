@@ -67,7 +67,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     console.log('selectedChapter:', selectedChapter);
     console.log('verses:', verses);
   }, [selectedBook, selectedChapter]);
-
+  
   useEffect(() => {
     // When a book, a chapter, and a verse are selected, fetch the text of that verse
     if (typeof selectedBook === 'string' && selectedChapter && selectedVerse) {

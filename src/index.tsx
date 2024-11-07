@@ -1,4 +1,4 @@
-import { definePlugin, ServerAPI, staticClasses } from "decky-frontend-lib";
+import { definePlugin, ServerAPI, staticClasses, Focusable } from "decky-frontend-lib";
 import { useEffect, useState, VFC } from "react";
 import { FaBible } from "react-icons/fa";
 import { getVerseOfTheDay, getVerse } from "@glowstudent/youversion";
@@ -105,19 +105,27 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         </div>
       )}
 
+      {/* Verse Text Display */}
+      {verseText && (
+        <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
+          <h2>Selected Verse</h2>
+          <p>{verseText}</p>
+        </div>
+      )}
+
       {/* Page Navigation */}
       {page === 0 && (
         <>
           <h1>Select a Book</h1>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
             {books.map(book => (
-              <button
-                key={book.book}
-                onClick={() => { setSelectedBook(book.book); setPage(1); }}
-                style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
-              >
-                {book.book}
-              </button>
+              <Focusable key={book.book} onActivate={() => { setSelectedBook(book.book); setPage(1); }}>
+                <button
+                  style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+                >
+                  {book.book}
+                </button>
+              </Focusable>
             ))}
           </div>
         </>
@@ -128,13 +136,13 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <h1>Select a Chapter</h1>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
             {chapters.map(chapter => (
-              <button
-                key={chapter}
-                onClick={() => { setSelectedChapter(chapter); setPage(2); }}
-                style={{ padding: '10px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
-              >
-                Chapter {chapter}
-              </button>
+              <Focusable key={chapter} onActivate={() => { setSelectedChapter(chapter); setPage(2); }}>
+                <button
+                  style={{ padding: '10px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+                >
+                  Chapter {chapter}
+                </button>
+              </Focusable>
             ))}
           </div>
         </>
@@ -145,22 +153,15 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <h1>Select a Verse</h1>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
             {verses.map((verse, index) => (
-              <button
-                key={index}
-                onClick={() => setSelectedVerse(verse)}
-                style={{ padding: '10px', background: '#ffc107', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
-              >
-                Verse {verse}
-              </button>
+              <Focusable key={index} onActivate={() => setSelectedVerse(verse)}>
+                <button
+                  style={{ padding: '10px', background: '#ffc107', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+                >
+                  Verse {verse}
+                </button>
+              </Focusable>
             ))}
           </div>
-        </>
-      )}
-
-      {selectedVerse && (
-        <>
-          <h1>Verse Text</h1>
-          <p>{verseText}</p>
         </>
       )}
 

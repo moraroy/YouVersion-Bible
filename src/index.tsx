@@ -4,7 +4,7 @@ import { FaBible } from "react-icons/fa";
 import { getVerseOfTheDay, getVerse } from "@glowstudent/youversion";
 import notify from './notify';
 import booksData from './books.json';
-import versesData from './verses.json'; // Import verses.json
+import versesData from './verses.json';
 
 interface BookData {
   book: string;
@@ -19,20 +19,20 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   const [verses, setVerses] = useState<string[]>([]);
   const [selectedVerse, setSelectedVerse] = useState<string | null>(null);
   const [verseText, setVerseText] = useState<string>("");
+
   const [page, setPage] = useState<number>(0);
   const [verseOfTheDay, setVerseOfTheDay] = useState<{ citation: string, passage: string } | null>(null);
 
   useEffect(() => {
     // Set the serverAPI in the notify class
     notify.setServer(serverAPI);
-  
-    // Display the verse of the day as a toast notification when the plugin is loaded
+
+    // Display the verse of the day as a toast notification
     (async () => {
       try {
         const verseOfTheDay = await getVerseOfTheDay();
         if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
           notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
-          // Also set the verse of the day in the state
           setVerseOfTheDay({ citation: verseOfTheDay.citation.toString(), passage: verseOfTheDay.passage.toString() });
         }
       } catch (error) {
@@ -42,27 +42,21 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   }, []);
 
   useEffect(() => {
-    // When a book is selected, fetch the chapters in that book
     if (selectedBook) {
       const bookData = books.find(book => book.book === selectedBook);
       if (bookData) {
         setChapters(Array.from({ length: bookData.chapters }, (_, i) => i + 1));
       }
     }
-    console.log('selectedBook:', selectedBook);
-    console.log('chapters:', chapters);
   }, [selectedBook]);
 
   useEffect(() => {
-    // When a book and a chapter are selected, fetch the verses in that chapter
-    if (typeof selectedBook === 'string' && selectedChapter) {
+    if (selectedBook && selectedChapter) {
       getVerse(selectedBook, selectedChapter.toString(), "1-10")
         .then((response) => {
-          console.log('Response from getVerse (verses):', response);
           if (response && 'verses' in response && Array.isArray(response.verses)) {
             setVerses(response.verses);
           } else {
-            // Fallback to local verses.json if API call fails or returns empty
             const chapterVerses = Object.keys(versesData)
               .filter(key => key.startsWith(`${selectedBook} ${selectedChapter}:`))
               .map(key => key.split(':')[1]);
@@ -70,20 +64,16 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           }
         });
     }
-    console.log('selectedChapter:', selectedChapter);
-    console.log('verses:', verses);
   }, [selectedBook, selectedChapter]);
-  
+
   useEffect(() => {
-    // When a book, a chapter, and a verse are selected, fetch the text of that verse
-    if (typeof selectedBook === 'string' && selectedChapter && selectedVerse) {
+    if (selectedBook && selectedChapter && selectedVerse) {
       (async () => {
         try {
           let verse = await getVerse(selectedBook, selectedChapter.toString(), selectedVerse.toString());
           if (verse && 'passage' in verse && typeof verse.passage === 'string') {
             setVerseText(verse.passage);
           } else {
-            // Fallback to local verses.json if API call fails or returns empty
             const verseKey = `${selectedBook} ${selectedChapter}:${selectedVerse}`;
             const offlineVerse = versesData[verseKey];
             if (offlineVerse) {
@@ -93,8 +83,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
             }
           }
         } catch (error) {
-          console.error("Failed to fetch the verse:", error);
-          // Fallback to local verses.json if API call fails
           const verseKey = `${selectedBook} ${selectedChapter}:${selectedVerse}`;
           const offlineVerse = versesData[verseKey];
           if (offlineVerse) {
@@ -105,64 +93,94 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         }
       })();
     }
-    console.log('selectedVerse:', selectedVerse);
-    console.log('verseText:', verseText);
   }, [selectedBook, selectedChapter, selectedVerse]);
 
   return (
-    <div>
+    <div style={{ padding: '20px' }}>
       {verseOfTheDay && (
-        <div>
+        <div style={{ marginBottom: '20px', background: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>
           <h2>Verse of the Day</h2>
-          <p>{verseOfTheDay.citation}</p>
+          <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
         </div>
       )}
+
+      {/* Page Navigation */}
       {page === 0 && (
         <>
           <h1>Select a Book</h1>
-          <ul>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
             {books.map(book => (
-              <li key={book.book} tabIndex={0} onKeyDown={(event) => {if (event.key === 'Enter') {setSelectedBook(book.book.toString()); setPage(1);}}} onClick={() => {setSelectedBook(book.book.toString()); setPage(1);}}>
+              <button
+                key={book.book}
+                onClick={() => { setSelectedBook(book.book); setPage(1); }}
+                style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+              >
                 {book.book}
-              </li>
+              </button>
             ))}
-          </ul>
+          </div>
         </>
       )}
-  
-      {page === 1 && (
+
+      {page === 1 && selectedBook && (
         <>
           <h1>Select a Chapter</h1>
-          <ul>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
             {chapters.map(chapter => (
-              <li key={chapter} tabIndex={0} onKeyDown={(event) => {if (event.key === 'Enter') {setSelectedChapter(chapter); setPage(2);}}} onClick={() => {setSelectedChapter(chapter); setPage(2);}}>
-                {chapter}
-              </li>
+              <button
+                key={chapter}
+                onClick={() => { setSelectedChapter(chapter); setPage(2); }}
+                style={{ padding: '10px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+              >
+                Chapter {chapter}
+              </button>
             ))}
-          </ul>
+          </div>
         </>
       )}
-  
-      {page === 2 && (
+
+      {page === 2 && selectedChapter && (
         <>
           <h1>Select a Verse</h1>
-          <ul>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
             {verses.map((verse, index) => (
-              <li key={index} tabIndex={0} onKeyDown={(event) => {if (event.key === 'Enter') setSelectedVerse(verse);}} onClick={() => setSelectedVerse(verse)}>
-                {verse}
-              </li>
+              <button
+                key={index}
+                onClick={() => setSelectedVerse(verse)}
+                style={{ padding: '10px', background: '#ffc107', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+              >
+                Verse {verse}
+              </button>
             ))}
-          </ul>
+          </div>
         </>
       )}
-  
+
       {selectedVerse && (
         <>
           <h1>Verse Text</h1>
           <p>{verseText}</p>
         </>
       )}
+
+      {/* Pagination Controls */}
+      <div style={{ marginTop: '20px', textAlign: 'center' }}>
+        <button
+          onClick={() => setPage(page === 0 ? 0 : page - 1)}
+          disabled={page === 0}
+          style={{ padding: '10px 20px', marginRight: '10px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+        >
+          Previous
+        </button>
+        <button
+          onClick={() => setPage(page === 2 ? 2 : page + 1)}
+          disabled={page === 2}
+          style={{ padding: '10px 20px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

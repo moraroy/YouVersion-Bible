@@ -32,7 +32,7 @@ export class notify {
       }
 
       try {
-        const verseOfTheDay = await getVerseOfTheDay(this.serverAPI);
+        const verseOfTheDay = await getVerseOfTheDay(); // Removed the serverAPI argument
         if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
           this.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
         }

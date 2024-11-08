@@ -1,34 +1,38 @@
-import { definePlugin, staticClasses, Focusable } from "decky-frontend-lib"; // removed serverAPI import
+import { definePlugin, ServerAPI, staticClasses, Focusable } from "decky-frontend-lib";
 import { useEffect, useState, VFC } from "react";
 import { FaBible } from "react-icons/fa";
-import { getVerseOfTheDay } from "@glowstudent/youversion"; // Importing the necessary function
+import { getVerseOfTheDay, getVerse } from "@glowstudent/youversion";
+import notify from './notify';
 import booksData from './books.json';
-import versesData from './verses.json';  // Ensure this imports your verses data correctly
+import versesData from './verses.json';
 
 interface BookData {
   book: string;
   chapters: number;
 }
 
-const Content: VFC = () => { // Removed serverAPI from props
+const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   const [books] = useState<BookData[]>(booksData.books);
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [chapters, setChapters] = useState<number[]>([]);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
-  const [verses, setVerses] = useState<string[]>([]); // Store verses for the selected chapter
+  const [verses, setVerses] = useState<string[]>([]);  // Store all verses for selected chapter
+  const [selectedVerse, setSelectedVerse] = useState<string | null>(null);
+  const [verseText, setVerseText] = useState<string>("");
+
   const [page, setPage] = useState<number>(0);
   const [verseOfTheDay, setVerseOfTheDay] = useState<{ citation: string, passage: string } | null>(null);
 
+  // Set server API for notifications
   useEffect(() => {
-    // Fetch the verse of the day and set it
+    notify.setServer(serverAPI);
+
     (async () => {
       try {
         const verseOfTheDay = await getVerseOfTheDay();
         if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
-          setVerseOfTheDay({
-            citation: verseOfTheDay.citation.toString(),
-            passage: verseOfTheDay.passage.toString(),
-          });
+          notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
+          setVerseOfTheDay({ citation: verseOfTheDay.citation.toString(), passage: verseOfTheDay.passage.toString() });
         }
       } catch (error) {
         console.error("Failed to fetch the verse of the day:", error);
@@ -36,6 +40,7 @@ const Content: VFC = () => { // Removed serverAPI from props
     })();
   }, []);
 
+  // Update available chapters for the selected book
   useEffect(() => {
     if (selectedBook) {
       const bookData = books.find(book => book.book === selectedBook);
@@ -45,48 +50,54 @@ const Content: VFC = () => { // Removed serverAPI from props
     }
   }, [selectedBook]);
 
-  // Fetch all verses from the selected chapter
+  // Fetch all verses for the selected chapter
   useEffect(() => {
     if (selectedBook && selectedChapter) {
-      // Filter versesData for all verses in the selected chapter
       const chapterVerses = Object.keys(versesData)
-        .filter(key => key.startsWith(`${selectedBook} ${selectedChapter}:`)) // Filter for the selected chapter
-        .map(key => versesData[key]); // Extract the verse text
+        .filter(key => key.startsWith(`${selectedBook} ${selectedChapter}:`))
+        .map(key => key.split(':')[1]); // Extract verse number
 
       setVerses(chapterVerses); // Set the verses for the selected chapter
     }
   }, [selectedBook, selectedChapter]);
 
-  // Constructing the title for the selected chapter
+  // Fetch individual verse content when selected
+  useEffect(() => {
+    if (selectedBook && selectedChapter && selectedVerse) {
+      (async () => {
+        try {
+          let verse = await getVerse(selectedBook, selectedChapter.toString(), selectedVerse.toString());
+          if (verse && 'passage' in verse && typeof verse.passage === 'string') {
+            setVerseText(verse.passage);
+          } else {
+            const verseKey = `${selectedBook} ${selectedChapter}:${selectedVerse}`;
+            const offlineVerse = versesData[verseKey];
+            if (offlineVerse) {
+              setVerseText(offlineVerse);
+            } else {
+              setVerseText("Verse not found.");
+            }
+          }
+        } catch (error) {
+          const verseKey = `${selectedBook} ${selectedChapter}:${selectedVerse}`;
+          const offlineVerse = versesData[verseKey];
+          if (offlineVerse) {
+            setVerseText(offlineVerse);
+          } else {
+            setVerseText("Verse not found.");
+          }
+        }
+      })();
+    }
+  }, [selectedBook, selectedChapter, selectedVerse]);
+
+  // Construct the title for the selected chapter
   const selectedChapterTitle = selectedBook && selectedChapter
     ? `${selectedBook} Chapter ${selectedChapter}`
     : "Selected Chapter";
 
-  // Style adjustments for focused and selected items
-  const getButtonStyle = (isSelected: boolean, isFocused: boolean) => {
-    if (isSelected) {
-      return { 
-        backgroundColor: '#007bff', 
-        color: '#fff', 
-        border: '2px solid #0056b3',
-        padding: '10px', 
-        borderRadius: '5px', 
-        cursor: 'pointer' 
-      };
-    }
-    return {
-      backgroundColor: isFocused ? '#007bff' : '#f8f9fa', // Light blue when focused
-      color: isFocused ? '#fff' : '#000', // White text when focused
-      border: 'none',
-      padding: '10px',
-      borderRadius: '5px',
-      cursor: 'pointer',
-    };
-  };
-
   return (
     <div style={{ padding: '20px' }}>
-      {/* Verse of the Day Display */}
       {verseOfTheDay && (
         <div style={{ marginBottom: '20px', background: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>
           <h2>Verse of the Day</h2>
@@ -95,13 +106,28 @@ const Content: VFC = () => { // Removed serverAPI from props
         </div>
       )}
 
-      {/* Chapter Display */}
+      {/* Verse Text Display for individual selected verse */}
+      {verseText && (
+        <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
+          <h2>Selected Verse</h2>
+          <p>{verseText}</p>
+        </div>
+      )}
+
+      {/* Full Chapter Display */}
       {verses.length > 0 && (
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
           <h2>{selectedChapterTitle}</h2>
           <div>
             {verses.map((verse, index) => (
-              <p key={index}>{verse}</p> // Display each verse in the chapter
+              <div key={index} style={{ marginBottom: '10px' }}>
+                <Focusable onActivate={() => setSelectedVerse(verse)}>
+                  <button style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+                    Verse {verse}
+                  </button>
+                </Focusable>
+                <p>{`Verse ${verse}`}: {versesData[`${selectedBook} ${selectedChapter}:${verse}`]}</p> {/* Show verse content */}
+              </div>
             ))}
           </div>
         </div>
@@ -114,7 +140,7 @@ const Content: VFC = () => { // Removed serverAPI from props
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
             {books.map(book => (
               <Focusable key={book.book} onActivate={() => { setSelectedBook(book.book); setPage(1); }}>
-                <button style={getButtonStyle(book.book === selectedBook, book.book === selectedBook)}>
+                <button style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
                   {book.book}
                 </button>
               </Focusable>
@@ -129,7 +155,7 @@ const Content: VFC = () => { // Removed serverAPI from props
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
             {chapters.map(chapter => (
               <Focusable key={chapter} onActivate={() => { setSelectedChapter(chapter); setPage(2); }}>
-                <button style={getButtonStyle(chapter === selectedChapter, chapter === selectedChapter)}>
+                <button style={{ padding: '10px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
                   Chapter {chapter}
                 </button>
               </Focusable>
@@ -159,11 +185,10 @@ const Content: VFC = () => { // Removed serverAPI from props
   );
 };
 
-export default definePlugin(() => {
+export default definePlugin((serverAPI: ServerAPI) => {
   return {
     title: <div className={staticClasses.Title}>YouVersion</div>,
-    content: <Content />,
+    content: <Content serverAPI={serverAPI} />,
     icon: <FaBible />,
   };
 });
-

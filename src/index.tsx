@@ -111,25 +111,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         </div>
       )}
 
-      {/* Verse Buttons for Selecting Verse (Moved to the top) */}
-      {verses.length > 0 && (
-        <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
-          <h3>Select a Verse</h3>
-          <div>
-            {verses.map((verse, index) => {
-              const verseKey = `${selectedBook} ${selectedChapter}:${verse}`;
-              return (
-                <Focusable key={index} onActivate={() => setSelectedVerse(verse)}>
-                  <button style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', margin: '5px' }}>
-                    Verse {verse}
-                  </button>
-                </Focusable>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       {/* Verse Text Display for individual selected verse */}
       {verseText && (
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
@@ -138,7 +119,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         </div>
       )}
 
-      {/* Full Chapter Display (Removed verse buttons from here) */}
+      {/* Full Chapter Display */}
       {verses.length > 0 && (
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
           <h2>{selectedChapterTitle}</h2>
@@ -147,6 +128,12 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
               const verseKey = `${selectedBook} ${selectedChapter}:${verse}`;
               return (
                 <div key={index} style={{ marginBottom: '10px' }}>
+                  <Focusable onActivate={() => setSelectedVerse(verse)}>
+                    <button style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+                      {/* Show the verse number on the button */}
+                      Verse {verse}
+                    </button>
+                  </Focusable>
                   {/* Show the verse content */}
                   <p>{versesData[verseKey]}</p>
                 </div>

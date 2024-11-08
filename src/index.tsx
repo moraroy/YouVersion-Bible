@@ -91,10 +91,12 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     }
   }, [selectedBook, selectedChapter, selectedVerse]);
 
-  // Construct the title for the selected chapter
-  const selectedChapterTitle = selectedBook && selectedChapter
-    ? `${selectedBook} Chapter ${selectedChapter}`
-    : "Selected Chapter";
+  // Construct the title for the selected chapter or verse
+  const selectedTitle = selectedVerse
+    ? `${selectedBook} ${selectedChapter}:${selectedVerse}`  // Shows "Genesis 1:1"
+    : selectedChapter
+    ? `${selectedBook} Chapter ${selectedChapter}`  // Shows "Genesis Chapter 1"
+    : "Selected Chapter";  // Default header when nothing is selected
 
   return (
     <div style={{ padding: '20px' }}>
@@ -109,7 +111,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
       {/* Verse Text Display for individual selected verse */}
       {verseText && (
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
-          <h2>Selected Verse</h2>
+          <h2>{selectedTitle}</h2>
           <p>{verseText}</p>
         </div>
       )}
@@ -117,16 +119,23 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
       {/* Full Chapter Display */}
       {verses.length > 0 && (
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
-          <h2>{selectedChapterTitle}</h2>
+          <h2>{selectedTitle}</h2>
           <div>
             {verses.map((verse, index) => (
               <div key={index} style={{ marginBottom: '10px' }}>
                 <Focusable onActivate={() => setSelectedVerse(verse)}>
-                  <button style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+                  <button style={{
+                    padding: '5px 10px',  // Reduced padding
+                    fontSize: '14px',  // Smaller text size
+                    background: '#007bff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                  }}>
                     Verse {verse}
                   </button>
                 </Focusable>
-                <p>{`Verse ${verse}`}: {versesData[`${selectedBook} ${selectedChapter}:${verse}`]}</p> {/* Show verse content */}
               </div>
             ))}
           </div>

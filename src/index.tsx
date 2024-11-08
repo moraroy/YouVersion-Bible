@@ -19,10 +19,11 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   const [verses, setVerses] = useState<string[]>([]);  // Store all verses for selected chapter
   const [selectedVerse, setSelectedVerse] = useState<string | null>(null);
   const [verseText, setVerseText] = useState<string>("");
+
   const [page, setPage] = useState<number>(0);
   const [verseOfTheDay, setVerseOfTheDay] = useState<{ citation: string, passage: string } | null>(null);
 
-  const scrollToTopRef = useRef<HTMLDivElement>(null); // Ref for scrolling back to top
+  const scrollToTopRef = useRef<HTMLDivElement>(null); // Reference for snapping back to top
 
   // Set server API for notifications
   useEffect(() => {
@@ -34,7 +35,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
           notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
           setVerseOfTheDay({ citation: verseOfTheDay.citation.toString(), passage: verseOfTheDay.passage.toString() });
-          readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`);
         }
       } catch (error) {
         console.error("Failed to fetch the verse of the day:", error);
@@ -185,6 +185,59 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
       )}
 
       {/* Page Navigation */}
+      {page === 0 && (
+        <>
+          <h1>Select a Book</h1>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
+            {books.map(book => (
+              <Focusable key={book.book} onActivate={() => { setSelectedBook(book.book); setPage(1); }}>
+                <button
+                  style={{
+                    padding: '10px',
+                    background: '#007bff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    outline: selectedBook === book.book ? '3px solid #28a745' : 'none', // Highlight selected button
+                    transition: 'outline 0.3s ease', // Smooth highlight transition
+                  }}
+                >
+                  {book.book}
+                </button>
+              </Focusable>
+            ))}
+          </div>
+        </>
+      )}
+
+      {page === 1 && selectedBook && (
+        <>
+          <h1>Select a Chapter</h1>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
+            {chapters.map(chapter => (
+              <Focusable key={chapter} onActivate={() => { setSelectedChapter(chapter); setPage(2); }}>
+                <button
+                  style={{
+                    padding: '10px',
+                    background: '#28a745',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    outline: selectedChapter === chapter ? '3px solid #28a745' : 'none', // Highlight selected button
+                    transition: 'outline 0.3s ease', // Smooth highlight transition
+                  }}
+                >
+                  Chapter {chapter}
+                </button>
+              </Focusable>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Pagination Controls */}
       <div style={{ marginTop: '20px', textAlign: 'center' }}>
         <button
           onClick={() => setPage(page === 0 ? 0 : page - 1)}
@@ -195,7 +248,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         </button>
         <button
           onClick={handleNextChapter}
-          disabled={!selectedChapter || selectedChapter === chapters.length}
           style={{ padding: '10px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '5px', marginLeft: '10px' }}
         >
           Next

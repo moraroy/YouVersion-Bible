@@ -228,8 +228,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   );
 };
 
-
-
 export default definePlugin((serverAPI: ServerAPI) => {
   return {
     title: <div className={staticClasses.Title}>YouVersion</div>,

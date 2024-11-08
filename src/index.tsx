@@ -114,7 +114,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
       {/* Verse Text Display for individual selected verse */}
       {verseText && (
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
-          <h2>{selectedVerseReference ? `Selected Verse: ${selectedVerseReference}` : "Selected Verse"}</h2>
+          <h2>{selectedVerseReference}</h2>
           <p>{verseText}</p>
         </div>
       )}

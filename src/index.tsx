@@ -239,23 +239,44 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 
       {/* Pagination Controls */}
       <div style={{ marginTop: '20px', textAlign: 'center' }}>
-        <button
-          onClick={() => setPage(page === 0 ? 0 : page - 1)}
-          disabled={page === 0}
-          style={{ padding: '10px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '5px' }}
-        >
-          Previous
-        </button>
-        <button
-          onClick={handleNextChapter}
-          style={{ padding: '10px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '5px', marginLeft: '10px' }}
-        >
-          Next
-        </button>
+        <Focusable onActivate={() => page > 0 && setPage(page - 1)}>
+          <button
+            style={{
+              padding: '10px',
+              background: page === 0 ? '#6c757d' : '#007bff', // Disabled button if page is 0
+              color: '#fff',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: page === 0 ? 'not-allowed' : 'pointer',
+              outline: page === 0 ? 'none' : '3px solid #28a745', // Highlight on focus
+              transition: 'outline 0.3s ease', // Smooth highlight transition
+            }}
+            disabled={page === 0}
+          >
+            Previous
+          </button>
+        </Focusable>
+        <Focusable onActivate={handleNextChapter}>
+          <button
+            style={{
+              padding: '10px',
+              background: '#007bff', // Default background
+              color: '#fff',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              outline: 'none', // Remove default outline, we handle focus separately
+              transition: 'outline 0.3s ease', // Smooth highlight transition
+            }}
+          >
+            Next
+          </button>
+        </Focusable>
       </div>
     </div>
   );
 };
+
 
 export default definePlugin((serverAPI: ServerAPI) => {
   return {

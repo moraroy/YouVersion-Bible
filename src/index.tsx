@@ -95,6 +95,33 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     }
   }, [selectedBook, selectedChapter, selectedVerse]);
 
+  // Constructing the title for the selected verse
+  const selectedVerseTitle = selectedBook && selectedChapter && selectedVerse
+    ? `${selectedBook} ${selectedChapter}:${selectedVerse}`
+    : "Selected Verse";
+
+  // Style adjustments for focused and selected items
+  const getButtonStyle = (isSelected: boolean, isFocused: boolean) => {
+    if (isSelected) {
+      return { 
+        backgroundColor: '#007bff', 
+        color: '#fff', 
+        border: '2px solid #0056b3',
+        padding: '10px', 
+        borderRadius: '5px', 
+        cursor: 'pointer' 
+      };
+    }
+    return {
+      backgroundColor: isFocused ? '#007bff' : '#f8f9fa', // Light blue when focused
+      color: isFocused ? '#fff' : '#000', // White text when focused
+      border: 'none',
+      padding: '10px',
+      borderRadius: '5px',
+      cursor: 'pointer',
+    };
+  };
+
   return (
     <div style={{ padding: '20px' }}>
       {verseOfTheDay && (
@@ -108,7 +135,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
       {/* Verse Text Display */}
       {verseText && (
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
-          <h2>Selected Verse</h2>
+          <h2>{selectedVerseTitle}</h2>
           <p>{verseText}</p>
         </div>
       )}
@@ -120,9 +147,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
             {books.map(book => (
               <Focusable key={book.book} onActivate={() => { setSelectedBook(book.book); setPage(1); }}>
-                <button
-                  style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
-                >
+                <button style={getButtonStyle(book.book === selectedBook, book.book === selectedBook)}>
                   {book.book}
                 </button>
               </Focusable>
@@ -137,9 +162,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
             {chapters.map(chapter => (
               <Focusable key={chapter} onActivate={() => { setSelectedChapter(chapter); setPage(2); }}>
-                <button
-                  style={{ padding: '10px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
-                >
+                <button style={getButtonStyle(chapter === selectedChapter, chapter === selectedChapter)}>
                   Chapter {chapter}
                 </button>
               </Focusable>
@@ -154,9 +177,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
             {verses.map((verse, index) => (
               <Focusable key={index} onActivate={() => setSelectedVerse(verse)}>
-                <button
-                  style={{ padding: '10px', background: '#ffc107', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
-                >
+                <button style={getButtonStyle(verse === selectedVerse, verse === selectedVerse)}>
                   Verse {verse}
                 </button>
               </Focusable>

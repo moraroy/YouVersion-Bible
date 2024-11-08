@@ -137,8 +137,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
                         border: 'none',
                         borderRadius: '5px',
                         cursor: 'pointer',
-                        outline: selectedVerse === verse ? '3px solid #28a745' : 'none', // Highlight selected button
-                        transition: 'outline 0.3s ease', // Smooth highlight transition
+                        transition: 'outline 0.3s ease',
                       }}
                     >
                       {/* Show the verse number on the button */}
@@ -162,6 +161,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
             {books.map(book => (
               <Focusable key={book.book} onActivate={() => { setSelectedBook(book.book); setPage(1); }}>
                 <button
+                  tabIndex={0}
                   style={{
                     padding: '10px',
                     background: '#007bff',
@@ -169,9 +169,9 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
                     border: 'none',
                     borderRadius: '5px',
                     cursor: 'pointer',
-                    outline: selectedBook === book.book ? '3px solid #28a745' : 'none', // Highlight selected button
-                    transition: 'outline 0.3s ease', // Smooth highlight transition
+                    transition: 'outline 0.3s ease',
                   }}
+                  onFocus={() => setSelectedBook(book.book)}  // Set the selectedBook on focus
                 >
                   {book.book}
                 </button>
@@ -188,6 +188,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
             {chapters.map(chapter => (
               <Focusable key={chapter} onActivate={() => { setSelectedChapter(chapter); setPage(2); }}>
                 <button
+                  tabIndex={0}
                   style={{
                     padding: '10px',
                     background: '#28a745',
@@ -195,9 +196,9 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
                     border: 'none',
                     borderRadius: '5px',
                     cursor: 'pointer',
-                    outline: selectedChapter === chapter ? '3px solid #28a745' : 'none', // Highlight selected button
-                    transition: 'outline 0.3s ease', // Smooth highlight transition
+                    transition: 'outline 0.3s ease',
                   }}
+                  onFocus={() => setSelectedChapter(chapter)}  // Set the selectedChapter on focus
                 >
                   Chapter {chapter}
                 </button>
@@ -227,8 +228,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     </div>
   );
 };
-
-
 
 export default definePlugin((serverAPI: ServerAPI) => {
   return {

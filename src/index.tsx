@@ -96,6 +96,11 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     ? `${selectedBook} Chapter ${selectedChapter}`
     : "Selected Chapter";
 
+  // Format the reference for the selected verse
+  const selectedVerseReference = selectedBook && selectedChapter && selectedVerse
+    ? `${selectedBook} ${selectedChapter}:${selectedVerse}`
+    : "";
+
   return (
     <div style={{ padding: '20px' }}>
       {verseOfTheDay && (
@@ -109,7 +114,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
       {/* Verse Text Display for individual selected verse */}
       {verseText && (
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
-          <h2>Selected Verse</h2>
+          <h2>{selectedVerseReference ? `Selected Verse: ${selectedVerseReference}` : "Selected Verse"}</h2>
           <p>{verseText}</p>
         </div>
       )}
@@ -119,18 +124,21 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
           <h2>{selectedChapterTitle}</h2>
           <div>
-            {verses.map((verse, index) => (
-              <div key={index} style={{ marginBottom: '10px' }}>
-                <Focusable onActivate={() => setSelectedVerse(verse)}>
-                  <button style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
-                    {/* Just show "Verse" with no number shown in the button */}
-                    Verse
-                  </button>
-                </Focusable>
-                {/* Removed "Verse {number}" text, just show the verse content */}
-                <p>{versesData[`${selectedBook} ${selectedChapter}:${verse}`]}</p>
-              </div>
-            ))}
+            {verses.map((verse, index) => {
+              const verseKey = `${selectedBook} ${selectedChapter}:${verse}`;
+              return (
+                <div key={index} style={{ marginBottom: '10px' }}>
+                  <Focusable onActivate={() => setSelectedVerse(verse)}>
+                    <button style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+                      {/* Show the verse number on the button */}
+                      Verse {verse}
+                    </button>
+                  </Focusable>
+                  {/* Show the verse content */}
+                  <p>{versesData[verseKey]}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

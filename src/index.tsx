@@ -116,23 +116,24 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 
       {/* Full Chapter Display */}
       {verses.length > 0 && (
-  <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
-    <h2>{selectedChapterTitle}</h2>
-    <div>
-      {verses.map((verse, index) => (
-        <div key={index} style={{ marginBottom: '10px' }}>
-          <Focusable onActivate={() => setSelectedVerse(verse)}>
-            <button style={{ padding: '8px 15px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
-              Verse {verse}  {/* This is the button text */}
-            </button>
-          </Focusable>
-          {/* Removed the redundant "Verse X:" text here */}
+        <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
+          <h2>{selectedChapterTitle}</h2>
+          <div>
+            {verses.map((verse, index) => (
+              <div key={index} style={{ marginBottom: '10px' }}>
+                <Focusable onActivate={() => setSelectedVerse(verse)}>
+                  <button style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+                    {/* Just show "Verse" with no number shown in the button */}
+                    Verse
+                  </button>
+                </Focusable>
+                {/* Removed "Verse {number}" text, just show the verse content */}
+                <p>{versesData[`${selectedBook} ${selectedChapter}:${verse}`]}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
-    </div>
-  </div>
-)}
-
+      )}
 
       {/* Page Navigation */}
       {page === 0 && (

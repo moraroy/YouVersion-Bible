@@ -1,5 +1,5 @@
 import { definePlugin, ServerAPI, staticClasses, Focusable } from "decky-frontend-lib";
-import { useEffect, useState, VFC } from "react";
+import { useEffect, useState, VFC, useRef } from "react";
 import { FaBible } from "react-icons/fa";
 import { getVerseOfTheDay, getVerse } from "@glowstudent/youversion";
 import notify from './notify';
@@ -19,9 +19,10 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   const [verses, setVerses] = useState<string[]>([]);  // Store all verses for selected chapter
   const [selectedVerse, setSelectedVerse] = useState<string | null>(null);
   const [verseText, setVerseText] = useState<string>("");
-
   const [page, setPage] = useState<number>(0);
   const [verseOfTheDay, setVerseOfTheDay] = useState<{ citation: string, passage: string } | null>(null);
+
+  const scrollToTopRef = useRef<HTMLDivElement>(null); // Ref for scrolling back to top
 
   // Set server API for notifications
   useEffect(() => {
@@ -33,6 +34,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
           notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
           setVerseOfTheDay({ citation: verseOfTheDay.citation.toString(), passage: verseOfTheDay.passage.toString() });
+          readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`);
         }
       } catch (error) {
         console.error("Failed to fetch the verse of the day:", error);
@@ -101,13 +103,41 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     ? `${selectedBook} ${selectedChapter}:${selectedVerse}`
     : "";
 
+  // Handle the "Next" button behavior to move to the next chapter
+  const handleNextChapter = () => {
+    if (selectedBook && selectedChapter !== null) {
+      const bookData = books.find(book => book.book === selectedBook);
+      if (bookData) {
+        const nextChapter = selectedChapter + 1;
+        if (nextChapter <= bookData.chapters) {
+          setSelectedChapter(nextChapter);
+          scrollToTopRef.current?.scrollIntoView({ behavior: 'smooth' }); // Scroll to top
+        } else {
+          // Optionally, move to next book if there's no next chapter
+          const nextBookIndex = books.findIndex(book => book.book === selectedBook) + 1;
+          if (nextBookIndex < books.length) {
+            setSelectedBook(books[nextBookIndex].book);
+            setSelectedChapter(1); // Move to first chapter of the next book
+          }
+        }
+      }
+    }
+  };
+
+  // Read aloud a given verse or passage
+  const readVerseAloud = (text: string) => {
+    const speech = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.speak(speech);
+  };
+
   return (
-    <div style={{ padding: '20px' }}>
+    <div ref={scrollToTopRef} style={{ padding: '20px' }}>
       {verseOfTheDay && (
         <div style={{ marginBottom: '20px', background: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>
           <h2>Verse of the Day</h2>
           <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
+          <button onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)} style={{ marginTop: '10px' }}>Read Aloud</button>
         </div>
       )}
 
@@ -116,6 +146,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
           <h2>{selectedVerseReference}</h2>
           <p>{verseText}</p>
+          <button onClick={() => readVerseAloud(verseText)} style={{ marginTop: '10px' }}>Read Aloud</button>
         </div>
       )}
 
@@ -141,7 +172,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
                         transition: 'outline 0.3s ease', // Smooth highlight transition
                       }}
                     >
-                      {/* Show the verse number on the button */}
                       Verse {verse}
                     </button>
                   </Focusable>
@@ -155,59 +185,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
       )}
 
       {/* Page Navigation */}
-      {page === 0 && (
-        <>
-          <h1>Select a Book</h1>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
-            {books.map(book => (
-              <Focusable key={book.book} onActivate={() => { setSelectedBook(book.book); setPage(1); }}>
-                <button
-                  style={{
-                    padding: '10px',
-                    background: '#007bff',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    outline: selectedBook === book.book ? '3px solid #28a745' : 'none', // Highlight selected button
-                    transition: 'outline 0.3s ease', // Smooth highlight transition
-                  }}
-                >
-                  {book.book}
-                </button>
-              </Focusable>
-            ))}
-          </div>
-        </>
-      )}
-
-      {page === 1 && selectedBook && (
-        <>
-          <h1>Select a Chapter</h1>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
-            {chapters.map(chapter => (
-              <Focusable key={chapter} onActivate={() => { setSelectedChapter(chapter); setPage(2); }}>
-                <button
-                  style={{
-                    padding: '10px',
-                    background: '#28a745',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    outline: selectedChapter === chapter ? '3px solid #28a745' : 'none', // Highlight selected button
-                    transition: 'outline 0.3s ease', // Smooth highlight transition
-                  }}
-                >
-                  Chapter {chapter}
-                </button>
-              </Focusable>
-            ))}
-          </div>
-        </>
-      )}
-
-      {/* Pagination Controls */}
       <div style={{ marginTop: '20px', textAlign: 'center' }}>
         <button
           onClick={() => setPage(page === 0 ? 0 : page - 1)}
@@ -217,8 +194,8 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           Previous
         </button>
         <button
-          onClick={() => setPage(page === 2 ? 2 : page + 1)}
-          disabled={page === 2}
+          onClick={handleNextChapter}
+          disabled={!selectedChapter || selectedChapter === chapters.length}
           style={{ padding: '10px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '5px', marginLeft: '10px' }}
         >
           Next

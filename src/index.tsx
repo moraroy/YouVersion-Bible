@@ -1,37 +1,34 @@
-import { definePlugin, ServerAPI, staticClasses, Focusable } from "decky-frontend-lib";
+import { definePlugin, staticClasses, Focusable } from "decky-frontend-lib"; // removed serverAPI import
 import { useEffect, useState, VFC } from "react";
 import { FaBible } from "react-icons/fa";
-import notify from './notify';
+import { getVerseOfTheDay } from "@glowstudent/youversion"; // Importing the necessary function
 import booksData from './books.json';
-import versesData from './verses.json';  // Make sure this imports your JSON correctly
+import versesData from './verses.json';  // Ensure this imports your verses data correctly
 
 interface BookData {
   book: string;
   chapters: number;
 }
 
-const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
+const Content: VFC = () => { // Removed serverAPI from props
   const [books] = useState<BookData[]>(booksData.books);
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [chapters, setChapters] = useState<number[]>([]);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
   const [verses, setVerses] = useState<string[]>([]); // Store verses for the selected chapter
-  const [verseText, setVerseText] = useState<string>("");
-
   const [page, setPage] = useState<number>(0);
   const [verseOfTheDay, setVerseOfTheDay] = useState<{ citation: string, passage: string } | null>(null);
 
   useEffect(() => {
-    // Set the serverAPI in the notify class
-    notify.setServer(serverAPI);
-
-    // Display the verse of the day as a toast notification
+    // Fetch the verse of the day and set it
     (async () => {
       try {
         const verseOfTheDay = await getVerseOfTheDay();
         if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
-          notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
-          setVerseOfTheDay({ citation: verseOfTheDay.citation.toString(), passage: verseOfTheDay.passage.toString() });
+          setVerseOfTheDay({
+            citation: verseOfTheDay.citation.toString(),
+            passage: verseOfTheDay.passage.toString(),
+          });
         }
       } catch (error) {
         console.error("Failed to fetch the verse of the day:", error);
@@ -89,6 +86,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 
   return (
     <div style={{ padding: '20px' }}>
+      {/* Verse of the Day Display */}
       {verseOfTheDay && (
         <div style={{ marginBottom: '20px', background: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>
           <h2>Verse of the Day</h2>
@@ -161,10 +159,11 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   );
 };
 
-export default definePlugin((serverAPI: ServerAPI) => {
+export default definePlugin(() => {
   return {
     title: <div className={staticClasses.Title}>YouVersion</div>,
-    content: <Content serverAPI={serverAPI} />,
+    content: <Content />,
     icon: <FaBible />,
   };
 });
+

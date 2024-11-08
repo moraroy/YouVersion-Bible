@@ -129,7 +129,18 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
               return (
                 <div key={index} style={{ marginBottom: '10px' }}>
                   <Focusable onActivate={() => setSelectedVerse(verse)}>
-                    <button style={{ padding: '10px', background: '#6f42c1', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+                    <button
+                      style={{
+                        padding: '10px',
+                        background: '#6f42c1',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        outline: selectedVerse === verse ? '3px solid #28a745' : 'none', // Highlight selected button
+                        transition: 'outline 0.3s ease', // Smooth highlight transition
+                      }}
+                    >
                       {/* Show the verse number on the button */}
                       Verse {verse}
                     </button>
@@ -150,7 +161,18 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
             {books.map(book => (
               <Focusable key={book.book} onActivate={() => { setSelectedBook(book.book); setPage(1); }}>
-                <button style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+                <button
+                  style={{
+                    padding: '10px',
+                    background: '#007bff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    outline: selectedBook === book.book ? '3px solid #28a745' : 'none', // Highlight selected button
+                    transition: 'outline 0.3s ease', // Smooth highlight transition
+                  }}
+                >
                   {book.book}
                 </button>
               </Focusable>
@@ -165,7 +187,18 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
             {chapters.map(chapter => (
               <Focusable key={chapter} onActivate={() => { setSelectedChapter(chapter); setPage(2); }}>
-                <button style={{ padding: '10px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+                <button
+                  style={{
+                    padding: '10px',
+                    background: '#28a745',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    outline: selectedChapter === chapter ? '3px solid #28a745' : 'none', // Highlight selected button
+                    transition: 'outline 0.3s ease', // Smooth highlight transition
+                  }}
+                >
                   Chapter {chapter}
                 </button>
               </Focusable>
@@ -179,14 +212,14 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         <button
           onClick={() => setPage(page === 0 ? 0 : page - 1)}
           disabled={page === 0}
-          style={{ padding: '10px 20px', marginRight: '10px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+          style={{ padding: '10px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '5px' }}
         >
           Previous
         </button>
         <button
           onClick={() => setPage(page === 2 ? 2 : page + 1)}
           disabled={page === 2}
-          style={{ padding: '10px 20px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+          style={{ padding: '10px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '5px', marginLeft: '10px' }}
         >
           Next
         </button>
@@ -194,6 +227,8 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     </div>
   );
 };
+
+
 
 export default definePlugin((serverAPI: ServerAPI) => {
   return {

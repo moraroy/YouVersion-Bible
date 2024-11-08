@@ -111,16 +111,8 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         </div>
       )}
 
-      {/* Verse Text Display for individual selected verse */}
-      {verseText && (
-        <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
-          <h2>{selectedVerseReference}</h2>
-          <p>{verseText}</p>
-        </div>
-      )}
-
-      {/* Full Chapter Display */}
-      {verses.length > 0 && (
+      {/* Verse Buttons - Move to Top of the Page */}
+      {selectedBook && selectedChapter && verses.length > 0 && (
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
           <h2>{selectedChapterTitle}</h2>
           <div>
@@ -140,6 +132,21 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* Verse Text Display for individual selected verse */}
+      {verseText && (
+        <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
+          <h2>{selectedVerseReference}</h2>
+          <p>{verseText}</p>
+        </div>
+      )}
+
+      {/* Full Chapter Display */}
+      {verses.length > 0 && (
+        <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
+          <h2>{selectedChapterTitle}</h2>
         </div>
       )}
 

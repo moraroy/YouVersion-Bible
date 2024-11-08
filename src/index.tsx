@@ -116,30 +116,23 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 
       {/* Full Chapter Display */}
       {verses.length > 0 && (
-        <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
-          <h2>{selectedChapterTitle}</h2>
-          <div>
-            {verses.map((verse, index) => (
-              <div key={index} style={{ marginBottom: '10px' }}>
-                <Focusable onActivate={() => setSelectedVerse(verse)}>
-                  <button style={{
-                    padding: '5px 10px',  // Reduced padding for smaller button
-                    fontSize: '14px',  // Smaller font size
-                    background: '#007bff',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                  }}>
-                    Verse {verse}
-                  </button>
-                </Focusable>
-                <p>{`Verse ${verse}`}: {versesData[`${selectedBook} ${selectedChapter}:${verse}`]}</p> {/* Show verse content */}
-              </div>
-            ))}
-          </div>
+  <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
+    <h2>{selectedChapterTitle}</h2>
+    <div>
+      {verses.map((verse, index) => (
+        <div key={index} style={{ marginBottom: '10px' }}>
+          <Focusable onActivate={() => setSelectedVerse(verse)}>
+            <button style={{ padding: '8px 15px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+              Verse {verse}  {/* This is the button text */}
+            </button>
+          </Focusable>
+          {/* Removed the redundant "Verse X:" text here */}
         </div>
-      )}
+      ))}
+    </div>
+  </div>
+)}
+
 
       {/* Page Navigation */}
       {page === 0 && (

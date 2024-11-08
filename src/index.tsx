@@ -129,7 +129,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
               return (
                 <div key={index} style={{ marginBottom: '10px' }}>
                   <Focusable onActivate={() => setSelectedVerse(verse)}>
-                    <button style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+                    <button style={{ padding: '10px', background: '#6f42c1', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
                       {/* Show the verse number on the button */}
                       Verse {verse}
                     </button>

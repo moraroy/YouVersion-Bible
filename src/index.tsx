@@ -132,6 +132,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 
   return (
     <div ref={scrollToTopRef} style={{ padding: '20px' }}>
+      {/* Verse of the Day Section */}
       {verseOfTheDay && (
         <div style={{ marginBottom: '20px', background: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>
           <h2>Verse of the Day</h2>
@@ -141,7 +142,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         </div>
       )}
 
-      {/* Verse Text Display for individual selected verse */}
+      {/* Displaying the Verse Text */}
       {verseText && (
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
           <h2>{selectedVerseReference}</h2>
@@ -150,41 +151,8 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         </div>
       )}
 
-      {/* Full Chapter Display */}
-      {verses.length > 0 && (
-        <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
-          <h2>{selectedChapterTitle}</h2>
-          <div>
-            {verses.map((verse, index) => {
-              const verseKey = `${selectedBook} ${selectedChapter}:${verse}`;
-              return (
-                <div key={index} style={{ marginBottom: '10px' }}>
-                  <Focusable onActivate={() => setSelectedVerse(verse)}>
-                    <button
-                      style={{
-                        padding: '10px',
-                        background: '#6f42c1',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '5px',
-                        cursor: 'pointer',
-                        outline: selectedVerse === verse ? '3px solid #28a745' : 'none', // Highlight selected button
-                        transition: 'outline 0.3s ease', // Smooth highlight transition
-                      }}
-                    >
-                      Verse {verse}
-                    </button>
-                  </Focusable>
-                  {/* Show the verse content */}
-                  <p>{versesData[verseKey]}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Page Navigation */}
+      {/* Chapter and Verse Navigation */}
+      {/* Book Selection */}
       {page === 0 && (
         <>
           <h1>Select a Book</h1>
@@ -211,6 +179,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         </>
       )}
 
+      {/* Chapter Selection */}
       {page === 1 && selectedBook && (
         <>
           <h1>Select a Chapter</h1>
@@ -235,6 +204,39 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
             ))}
           </div>
         </>
+      )}
+
+      {/* Verses for Selected Chapter */}
+      {page === 2 && selectedChapter && (
+        <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
+          <h2>{selectedChapterTitle}</h2>
+          <div>
+            {verses.map((verse, index) => {
+              const verseKey = `${selectedBook} ${selectedChapter}:${verse}`;
+              return (
+                <div key={index} style={{ marginBottom: '10px' }}>
+                  <Focusable onActivate={() => setSelectedVerse(verse)}>
+                    <button
+                      style={{
+                        padding: '10px',
+                        background: '#6f42c1',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        outline: selectedVerse === verse ? '3px solid #28a745' : 'none', // Highlight selected button
+                        transition: 'outline 0.3s ease', // Smooth highlight transition
+                      }}
+                    >
+                      Verse {verse}
+                    </button>
+                  </Focusable>
+                  <p>{versesData[verseKey]}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
 
       {/* Pagination Controls */}
@@ -276,7 +278,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     </div>
   );
 };
-
 
 export default definePlugin((serverAPI: ServerAPI) => {
   return {

@@ -3,7 +3,6 @@ import { useEffect, useState, VFC, useRef } from "react";
 import { FaBible } from "react-icons/fa";
 import { getVerseOfTheDay, getVerse } from "@glowstudent/youversion";
 import notify from './notify';
-import booksData from './books.json';
 import versesData from './verses.json';
 
 interface BookData {
@@ -12,7 +11,8 @@ interface BookData {
 }
 
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
-  const [books] = useState<BookData[]>(booksData.books);
+  // Generate books and chapters dynamically from versesData
+  const [books, setBooks] = useState<BookData[]>([]);
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [chapters, setChapters] = useState<number[]>([]);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
@@ -25,6 +25,30 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 
   const scrollToTopRef = useRef<HTMLDivElement>(null);
 
+  // Generate the list of books and chapters from versesData
+  useEffect(() => {
+    const bookMap: Record<string, Set<number>> = {};  // Store chapters by book name
+    
+    Object.keys(versesData).forEach((key) => {
+      const [book, chapterAndVerse] = key.split(" ");
+      const chapter = parseInt(chapterAndVerse.split(":")[0]);
+
+      if (!bookMap[book]) {
+        bookMap[book] = new Set();
+      }
+      bookMap[book].add(chapter);
+    });
+
+    // Convert the bookMap into an array of BookData (book and number of chapters)
+    const bookList = Object.keys(bookMap).map((book) => ({
+      book,
+      chapters: Math.max(...Array.from(bookMap[book]))
+    }));
+
+    setBooks(bookList);
+  }, []);
+
+  // Fetch verse of the day
   useEffect(() => {
     notify.setServer(serverAPI);
 
@@ -41,6 +65,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     })();
   }, []);
 
+  // Update chapters when a book is selected
   useEffect(() => {
     if (selectedBook) {
       const bookData = books.find(book => book.book === selectedBook);
@@ -48,8 +73,9 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         setChapters(Array.from({ length: bookData.chapters }, (_, i) => i + 1));
       }
     }
-  }, [selectedBook]);
+  }, [selectedBook, books]);
 
+  // Update verses when a chapter is selected
   useEffect(() => {
     if (selectedBook && selectedChapter) {
       const chapterVerses = Object.keys(versesData)
@@ -60,6 +86,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     }
   }, [selectedBook, selectedChapter]);
 
+  // Fetch verse text when a specific verse is selected
   useEffect(() => {
     if (selectedBook && selectedChapter && selectedVerse) {
       (async () => {
@@ -128,7 +155,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <h2>Verse of the Day</h2>
           <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
-          {/* Start Fresh styled button */}
           <ButtonItem layout="below" onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)}>
             Read Aloud
           </ButtonItem>
@@ -139,7 +165,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
           <h2>{selectedVerseReference}</h2>
           <p>{verseText}</p>
-          {/* Start Fresh styled button */}
           <ButtonItem layout="below" onClick={() => readVerseAloud(verseText)}>
             Read Aloud
           </ButtonItem>

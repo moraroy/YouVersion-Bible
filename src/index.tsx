@@ -1,30 +1,25 @@
-import { definePlugin, ServerAPI, staticClasses, ButtonItem } from "decky-frontend-lib";
+import { definePlugin, staticClasses, ButtonItem } from "decky-frontend-lib";
 import { useEffect, useState, VFC, useRef } from "react";
 import { FaBible } from "react-icons/fa";
-import { getVerseOfTheDay, getVerse } from "@glowstudent/youversion";
-import notify from './notify';
 import versesData from './verses.json';
 
 interface BookData {
   book: string;
-  chapters: number;
+  chapters: number[];
 }
 
-const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
+const Content: VFC = () => { // Removed the serverAPI prop
   const [books, setBooks] = useState<BookData[]>([]);
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
-  const [chapters, setChapters] = useState<number[]>([]);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
-  const [verses, setVerses] = useState<string[]>([]);  
+  const [verses, setVerses] = useState<string[]>([]);
   const [selectedVerse, setSelectedVerse] = useState<string | null>(null);
   const [verseText, setVerseText] = useState<string>("");
-
   const [page, setPage] = useState<number>(0);
-  const [verseOfTheDay, setVerseOfTheDay] = useState<{ citation: string, passage: string } | null>(null);
 
   const scrollToTopRef = useRef<HTMLDivElement>(null);
 
-  // Generate the list of books and chapters from versesData
+  // Organize the books and chapters from versesData
   useEffect(() => {
     const bookMap: Record<string, Set<number>> = {};  // Store chapters by book name
 
@@ -47,38 +42,11 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     // Convert the bookMap into an array of BookData (book and number of chapters)
     const bookList = Object.keys(bookMap).map((book) => ({
       book,
-      chapters: Math.max(...Array.from(bookMap[book]))
+      chapters: Array.from(bookMap[book]).sort((a, b) => a - b), // Sorting chapters numerically
     }));
 
     setBooks(bookList);
   }, []);
-
-  // Fetch verse of the day
-  useEffect(() => {
-    notify.setServer(serverAPI);
-
-    (async () => {
-      try {
-        const verseOfTheDay = await getVerseOfTheDay();
-        if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
-          notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
-          setVerseOfTheDay({ citation: verseOfTheDay.citation.toString(), passage: verseOfTheDay.passage.toString() });
-        }
-      } catch (error) {
-        console.error("Failed to fetch the verse of the day:", error);
-      }
-    })();
-  }, []);
-
-  // Update chapters when a book is selected
-  useEffect(() => {
-    if (selectedBook) {
-      const bookData = books.find(book => book.book === selectedBook);
-      if (bookData) {
-        setChapters(Array.from({ length: bookData.chapters }, (_, i) => i + 1));
-      }
-    }
-  }, [selectedBook, books]);
 
   // Update verses when a chapter is selected
   useEffect(() => {
@@ -94,47 +62,23 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   // Fetch verse text when a specific verse is selected
   useEffect(() => {
     if (selectedBook && selectedChapter && selectedVerse) {
-      (async () => {
-        try {
-          let verse = await getVerse(selectedBook, selectedChapter.toString(), selectedVerse.toString());
-          if (verse && 'passage' in verse && typeof verse.passage === 'string') {
-            setVerseText(verse.passage);
-          } else {
-            const verseKey = `${selectedBook} ${selectedChapter}:${selectedVerse}`;
-            const offlineVerse = versesData[verseKey];
-            if (offlineVerse) {
-              setVerseText(offlineVerse);
-            } else {
-              setVerseText("Verse not found.");
-            }
-          }
-        } catch (error) {
-          const verseKey = `${selectedBook} ${selectedChapter}:${selectedVerse}`;
-          const offlineVerse = versesData[verseKey];
-          if (offlineVerse) {
-            setVerseText(offlineVerse);
-          } else {
-            setVerseText("Verse not found.");
-          }
-        }
-      })();
+      const verseKey = `${selectedBook} ${selectedChapter}:${selectedVerse}`;
+      const verseText = versesData[verseKey];
+
+      if (verseText) {
+        setVerseText(verseText);
+      } else {
+        setVerseText("Verse not found.");
+      }
     }
   }, [selectedBook, selectedChapter, selectedVerse]);
-
-  const selectedChapterTitle = selectedBook && selectedChapter
-    ? `${selectedBook} Chapter ${selectedChapter}`
-    : "Selected Chapter";
-
-  const selectedVerseReference = selectedBook && selectedChapter && selectedVerse
-    ? `${selectedBook} ${selectedChapter}:${selectedVerse}`
-    : "";
 
   const handleNextChapter = () => {
     if (selectedBook && selectedChapter !== null) {
       const bookData = books.find(book => book.book === selectedBook);
       if (bookData) {
         const nextChapter = selectedChapter + 1;
-        if (nextChapter <= bookData.chapters) {
+        if (nextChapter <= bookData.chapters.length) {
           setSelectedChapter(nextChapter);
           scrollToTopRef.current?.scrollIntoView({ behavior: 'smooth' });
         } else {
@@ -148,53 +92,12 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     }
   };
 
-  const readVerseAloud = (text: string) => {
-    const speech = new SpeechSynthesisUtterance(text);
-    window.speechSynthesis.speak(speech);
-  };
-
   return (
     <div ref={scrollToTopRef} style={{ padding: '20px' }}>
-      {verseOfTheDay && (
-        <div style={{ marginBottom: '20px', background: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>
-          <h2>Verse of the Day</h2>
-          <p><strong>{verseOfTheDay.citation}</strong></p>
-          <p>{verseOfTheDay.passage}</p>
-          <ButtonItem layout="below" onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)}>
-            Read Aloud
-          </ButtonItem>
-        </div>
-      )}
-
       {verseText && (
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
-          <h2>{selectedVerseReference}</h2>
+          <h2>{selectedBook} {selectedChapter}:{selectedVerse}</h2>
           <p>{verseText}</p>
-          <ButtonItem layout="below" onClick={() => readVerseAloud(verseText)}>
-            Read Aloud
-          </ButtonItem>
-        </div>
-      )}
-
-      {verses.length > 0 && (
-        <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
-          <h2>{selectedChapterTitle}</h2>
-          <div>
-            {verses.map((verse, index) => {
-              const verseKey = `${selectedBook} ${selectedChapter}:${verse}`;
-              return (
-                <div key={index} style={{ marginBottom: '10px' }}>
-                  <ButtonItem layout="below" onClick={() => {
-                    setSelectedVerse(verse); 
-                    scrollToTopRef.current?.scrollIntoView({ behavior: 'smooth' });
-                  }}>
-                    Verse {verse}
-                  </ButtonItem>
-                  <p>{versesData[verseKey]}</p>
-                </div>
-              );
-            })}
-          </div>
         </div>
       )}
 
@@ -216,9 +119,22 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         <>
           <h1>Select a Chapter</h1>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
-            {chapters.map(chapter => (
+            {books.find(book => book.book === selectedBook)?.chapters.map((chapter) => (
               <ButtonItem key={chapter} layout="below" onClick={() => { setSelectedChapter(chapter); setPage(2); }}>
                 Chapter {chapter}
+              </ButtonItem>
+            ))}
+          </div>
+        </>
+      )}
+
+      {page === 2 && selectedChapter && selectedBook && (
+        <>
+          <h1>Select a Verse</h1>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
+            {verses.map((verse) => (
+              <ButtonItem key={verse} layout="below" onClick={() => { setSelectedVerse(verse); }}>
+                Verse {verse}
               </ButtonItem>
             ))}
           </div>
@@ -238,10 +154,10 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   );
 };
 
-export default definePlugin((serverAPI: ServerAPI) => {
+export default definePlugin(() => {
   return {
-    title: <div className={staticClasses.Title}>YouVersion</div>,
-    content: <Content serverAPI={serverAPI} />,
+    title: <div className={staticClasses.Title}>Bible Plugin</div>,
+    content: <Content />,
     icon: <FaBible />,
   };
 });

@@ -8,7 +8,7 @@ interface BookData {
   chapters: number[];
 }
 
-const Content: VFC = () => { // Removed the serverAPI prop
+const Content: VFC = () => {
   const [books, setBooks] = useState<BookData[]>([]);
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
@@ -30,13 +30,16 @@ const Content: VFC = () => { // Removed the serverAPI prop
       const [book, chapterAndVerse] = key.split(" ");
       const chapter = parseInt(chapterAndVerse.split(":")[0]);
 
+      // Fix for books with numbers like "1 Kings", "2 Kings"
+      const correctedBookName = book.replace(/^(\d+)/, (match) => match.padStart(2, "0")); // Ensure book names like "1 Kings" are parsed correctly
+
       // Check if the chapter is a valid number
       if (isNaN(chapter)) return;
 
-      if (!bookMap[book]) {
-        bookMap[book] = new Set();
+      if (!bookMap[correctedBookName]) {
+        bookMap[correctedBookName] = new Set();
       }
-      bookMap[book].add(chapter);
+      bookMap[correctedBookName].add(chapter);
     });
 
     // Convert the bookMap into an array of BookData (book and number of chapters)
@@ -130,15 +133,22 @@ const Content: VFC = () => { // Removed the serverAPI prop
 
       {page === 2 && selectedChapter && selectedBook && (
         <>
-          <h1>Select a Verse</h1>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
+          <h1>Chapter {selectedChapter} of {selectedBook}</h1>
+          <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
             {verses.map((verse) => (
-              <ButtonItem key={verse} layout="below" onClick={() => { setSelectedVerse(verse); }}>
+              <ButtonItem key={verse} layout="below" onClick={() => setSelectedVerse(verse)}>
                 Verse {verse}
               </ButtonItem>
             ))}
           </div>
         </>
+      )}
+
+      {verseText && selectedVerse && (
+        <div style={{ marginTop: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
+          <h2>{selectedBook} {selectedChapter}:{selectedVerse}</h2>
+          <p>{verseText}</p>
+        </div>
       )}
 
       <div style={{ marginTop: '20px', textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '20px' }}>

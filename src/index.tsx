@@ -11,7 +11,6 @@ interface BookData {
 }
 
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
-  // Generate books and chapters dynamically from versesData
   const [books, setBooks] = useState<BookData[]>([]);
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [chapters, setChapters] = useState<number[]>([]);
@@ -28,10 +27,16 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   // Generate the list of books and chapters from versesData
   useEffect(() => {
     const bookMap: Record<string, Set<number>> = {};  // Store chapters by book name
-    
+
     Object.keys(versesData).forEach((key) => {
+      // Skip malformed or unwanted keys (like "#")
+      if (key.startsWith("#")) return;
+
       const [book, chapterAndVerse] = key.split(" ");
       const chapter = parseInt(chapterAndVerse.split(":")[0]);
+
+      // Check if the chapter is a valid number
+      if (isNaN(chapter)) return;
 
       if (!bookMap[book]) {
         bookMap[book] = new Set();

@@ -1,4 +1,4 @@
-import { definePlugin, ServerAPI, staticClasses, Focusable, ButtonItem } from "decky-frontend-lib";
+import { definePlugin, ServerAPI, staticClasses, ButtonItem } from "decky-frontend-lib";
 import { useEffect, useState, VFC, useRef } from "react";
 import { FaBible } from "react-icons/fa";
 import { getVerseOfTheDay, getVerse } from "@glowstudent/youversion";
@@ -128,6 +128,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <h2>Verse of the Day</h2>
           <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
+          {/* Start Fresh styled button */}
           <ButtonItem layout="below" onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)}>
             Read Aloud
           </ButtonItem>
@@ -138,6 +139,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
           <h2>{selectedVerseReference}</h2>
           <p>{verseText}</p>
+          {/* Start Fresh styled button */}
           <ButtonItem layout="below" onClick={() => readVerseAloud(verseText)}>
             Read Aloud
           </ButtonItem>
@@ -152,14 +154,12 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
               const verseKey = `${selectedBook} ${selectedChapter}:${verse}`;
               return (
                 <div key={index} style={{ marginBottom: '10px' }}>
-                  <Focusable onActivate={() => { 
+                  <ButtonItem layout="below" onClick={() => {
                     setSelectedVerse(verse); 
-                    scrollToTopRef.current?.scrollIntoView({ behavior: 'smooth' });  
+                    scrollToTopRef.current?.scrollIntoView({ behavior: 'smooth' });
                   }}>
-                    <ButtonItem layout="below">
-                      Verse {verse}
-                    </ButtonItem>
-                  </Focusable>
+                    Verse {verse}
+                  </ButtonItem>
                   <p>{versesData[verseKey]}</p>
                 </div>
               );
@@ -168,16 +168,15 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         </div>
       )}
 
+      {/* Book and Chapter Selection */}
       {page === 0 && (
         <>
           <h1>Select a Book</h1>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
             {books.map(book => (
-              <Focusable key={book.book} onActivate={() => { setSelectedBook(book.book); setPage(1); }}>
-                <ButtonItem layout="below">
-                  {book.book}
-                </ButtonItem>
-              </Focusable>
+              <ButtonItem key={book.book} layout="below" onClick={() => { setSelectedBook(book.book); setPage(1); }}>
+                {book.book}
+              </ButtonItem>
             ))}
           </div>
         </>
@@ -188,28 +187,22 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <h1>Select a Chapter</h1>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
             {chapters.map(chapter => (
-              <Focusable key={chapter} onActivate={() => { setSelectedChapter(chapter); setPage(2); }}>
-                <ButtonItem layout="below">
-                  Chapter {chapter}
-                </ButtonItem>
-              </Focusable>
+              <ButtonItem key={chapter} layout="below" onClick={() => { setSelectedChapter(chapter); setPage(2); }}>
+                Chapter {chapter}
+              </ButtonItem>
             ))}
           </div>
         </>
       )}
 
       <div style={{ marginTop: '20px', textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '20px' }}>
-        <Focusable onActivate={() => page > 0 && setPage(page - 1)}>
-          <ButtonItem layout="below" disabled={page === 0}>
-            Previous
-          </ButtonItem>
-        </Focusable>
+        <ButtonItem layout="below" disabled={page === 0} onClick={() => page > 0 && setPage(page - 1)}>
+          Previous
+        </ButtonItem>
         
-        <Focusable onActivate={handleNextChapter}>
-          <ButtonItem layout="below">
-            Next
-          </ButtonItem>
-        </Focusable>
+        <ButtonItem layout="below" onClick={handleNextChapter}>
+          Next
+        </ButtonItem>
       </div>
     </div>
   );

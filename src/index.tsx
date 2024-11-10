@@ -14,7 +14,7 @@ interface BookData {
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   const [books] = useState<BookData[]>(booksData.books);
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
-  const [chapters, setChapters] = useState<number[]>([]);
+  const [chapters, setChapters] = useState<number[]>([]);  // Store the chapters when a book is selected
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
   const [verses, setVerses] = useState<string[]>([]);  // Store all verses for selected chapter
   const [selectedVerse, setSelectedVerse] = useState<string | null>(null);
@@ -137,12 +137,9 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <h2>Verse of the Day</h2>
           <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
-          <button 
-            onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)} 
-            style={{ marginTop: '10px', padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
-          >
+          <div onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)} style={{ marginTop: '10px', cursor: 'pointer', padding: '10px', background: '#007bff', color: '#fff', borderRadius: '5px' }}>
             Read Aloud
-          </button>
+          </div>
         </div>
       )}
 
@@ -151,12 +148,9 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
           <h2>{selectedVerseReference}</h2>
           <p>{verseText}</p>
-          <button 
-            onClick={() => readVerseAloud(verseText)} 
-            style={{ marginTop: '10px', padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
-          >
+          <div onClick={() => readVerseAloud(verseText)} style={{ marginTop: '10px', cursor: 'pointer', padding: '10px', background: '#007bff', color: '#fff', borderRadius: '5px' }}>
             Read Aloud
-          </button>
+          </div>
         </div>
       )}
 
@@ -173,7 +167,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
                     setSelectedVerse(verse); 
                     scrollToTopRef.current?.scrollIntoView({ behavior: 'smooth' });  // Scroll to top
                   }}>
-                    <button
+                    <div
                       style={{
                         padding: '10px',
                         background: '#6f42c1',
@@ -186,7 +180,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
                       }}
                     >
                       Verse {verse}
-                    </button>
+                    </div>
                   </Focusable>
                   {/* Show the verse content */}
                   <p>{versesData[verseKey]}</p>
@@ -204,7 +198,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
             {books.map(book => (
               <Focusable key={book.book} onActivate={() => { setSelectedBook(book.book); setPage(1); }}>
-                <button
+                <div
                   style={{
                     padding: '10px',
                     background: '#007bff',
@@ -217,7 +211,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
                   }}
                 >
                   {book.book}
-                </button>
+                </div>
               </Focusable>
             ))}
           </div>
@@ -230,7 +224,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
             {chapters.map(chapter => (
               <Focusable key={chapter} onActivate={() => { setSelectedChapter(chapter); setPage(2); }}>
-                <button
+                <div
                   style={{
                     padding: '10px',
                     background: '#28a745',
@@ -243,7 +237,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
                   }}
                 >
                   Chapter {chapter}
-                </button>
+                </div>
               </Focusable>
             ))}
           </div>
@@ -253,7 +247,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
       {/* Pagination Controls */}
       <div style={{ marginTop: '20px', textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '20px' }}>
         <Focusable onActivate={() => page > 0 && setPage(page - 1)}>
-          <button
+          <div
             style={{
               padding: '10px',
               background: page === 0 ? '#6c757d' : '#007bff', // Disabled button if page is 0
@@ -264,14 +258,13 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
               outline: page === 0 ? 'none' : '3px solid #28a745', // Highlight on focus
               transition: 'outline 0.3s ease', // Smooth highlight transition
             }}
-            disabled={page === 0}
           >
             Previous
-          </button>
+          </div>
         </Focusable>
         
         <Focusable onActivate={handleNextChapter}>
-          <button
+          <div
             style={{
               padding: '10px',
               background: '#007bff', // Default background
@@ -284,7 +277,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
             }}
           >
             Next
-          </button>
+          </div>
         </Focusable>
       </div>
     </div>

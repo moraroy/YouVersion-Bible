@@ -1,4 +1,4 @@
-import { definePlugin, ServerAPI, staticClasses, Focusable } from "decky-frontend-lib";
+import { definePlugin, ServerAPI, staticClasses, Focusable, ButtonItem } from "decky-frontend-lib";
 import { useEffect, useState, VFC, useRef } from "react";
 import { FaBible } from "react-icons/fa";
 import { getVerseOfTheDay, getVerse } from "@glowstudent/youversion";
@@ -16,16 +16,15 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [chapters, setChapters] = useState<number[]>([]);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
-  const [verses, setVerses] = useState<string[]>([]);  // Store all verses for selected chapter
+  const [verses, setVerses] = useState<string[]>([]);  
   const [selectedVerse, setSelectedVerse] = useState<string | null>(null);
   const [verseText, setVerseText] = useState<string>("");
 
   const [page, setPage] = useState<number>(0);
   const [verseOfTheDay, setVerseOfTheDay] = useState<{ citation: string, passage: string } | null>(null);
 
-  const scrollToTopRef = useRef<HTMLDivElement>(null); // Reference for snapping back to top
+  const scrollToTopRef = useRef<HTMLDivElement>(null);
 
-  // Set server API for notifications
   useEffect(() => {
     notify.setServer(serverAPI);
 
@@ -42,7 +41,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     })();
   }, []);
 
-  // Update available chapters for the selected book
   useEffect(() => {
     if (selectedBook) {
       const bookData = books.find(book => book.book === selectedBook);
@@ -52,18 +50,16 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     }
   }, [selectedBook]);
 
-  // Fetch all verses for the selected chapter
   useEffect(() => {
     if (selectedBook && selectedChapter) {
       const chapterVerses = Object.keys(versesData)
         .filter(key => key.startsWith(`${selectedBook} ${selectedChapter}:`))
-        .map(key => key.split(':')[1]); // Extract verse number
+        .map(key => key.split(':')[1]);
 
-      setVerses(chapterVerses); // Set the verses for the selected chapter
+      setVerses(chapterVerses);
     }
   }, [selectedBook, selectedChapter]);
 
-  // Fetch individual verse content when selected
   useEffect(() => {
     if (selectedBook && selectedChapter && selectedVerse) {
       (async () => {
@@ -93,17 +89,14 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     }
   }, [selectedBook, selectedChapter, selectedVerse]);
 
-  // Construct the title for the selected chapter
   const selectedChapterTitle = selectedBook && selectedChapter
     ? `${selectedBook} Chapter ${selectedChapter}`
     : "Selected Chapter";
 
-  // Format the reference for the selected verse
   const selectedVerseReference = selectedBook && selectedChapter && selectedVerse
     ? `${selectedBook} ${selectedChapter}:${selectedVerse}`
     : "";
 
-  // Handle the "Next" button behavior to move to the next chapter
   const handleNextChapter = () => {
     if (selectedBook && selectedChapter !== null) {
       const bookData = books.find(book => book.book === selectedBook);
@@ -111,20 +104,18 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         const nextChapter = selectedChapter + 1;
         if (nextChapter <= bookData.chapters) {
           setSelectedChapter(nextChapter);
-          scrollToTopRef.current?.scrollIntoView({ behavior: 'smooth' }); // Scroll to top
+          scrollToTopRef.current?.scrollIntoView({ behavior: 'smooth' });
         } else {
-          // Optionally, move to next book if there's no next chapter
           const nextBookIndex = books.findIndex(book => book.book === selectedBook) + 1;
           if (nextBookIndex < books.length) {
             setSelectedBook(books[nextBookIndex].book);
-            setSelectedChapter(1); // Move to first chapter of the next book
+            setSelectedChapter(1);
           }
         }
       }
     }
   };
 
-  // Read aloud a given verse or passage
   const readVerseAloud = (text: string) => {
     const speech = new SpeechSynthesisUtterance(text);
     window.speechSynthesis.speak(speech);
@@ -137,20 +128,22 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <h2>Verse of the Day</h2>
           <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
-          <button onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)} style={{ marginTop: '10px' }}>Read Aloud</button>
+          <ButtonItem layout="below" onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)}>
+            Read Aloud
+          </ButtonItem>
         </div>
       )}
 
-      {/* Verse Text Display for individual selected verse */}
       {verseText && (
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
           <h2>{selectedVerseReference}</h2>
           <p>{verseText}</p>
-          <button onClick={() => readVerseAloud(verseText)} style={{ marginTop: '10px' }}>Read Aloud</button>
+          <ButtonItem layout="below" onClick={() => readVerseAloud(verseText)}>
+            Read Aloud
+          </ButtonItem>
         </div>
       )}
 
-      {/* Full Chapter Display */}
       {verses.length > 0 && (
         <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
           <h2>{selectedChapterTitle}</h2>
@@ -161,24 +154,12 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
                 <div key={index} style={{ marginBottom: '10px' }}>
                   <Focusable onActivate={() => { 
                     setSelectedVerse(verse); 
-                    scrollToTopRef.current?.scrollIntoView({ behavior: 'smooth' });  // Scroll to top
+                    scrollToTopRef.current?.scrollIntoView({ behavior: 'smooth' });  
                   }}>
-                    <button
-                      style={{
-                        padding: '10px',
-                        background: '#6f42c1',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '5px',
-                        cursor: 'pointer',
-                        outline: selectedVerse === verse ? '3px solid #28a745' : 'none', // Highlight selected button
-                        transition: 'outline 0.3s ease', // Smooth highlight transition
-                      }}
-                    >
+                    <ButtonItem layout="below">
                       Verse {verse}
-                    </button>
+                    </ButtonItem>
                   </Focusable>
-                  {/* Show the verse content */}
                   <p>{versesData[verseKey]}</p>
                 </div>
               );
@@ -187,27 +168,15 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         </div>
       )}
 
-      {/* Page Navigation */}
       {page === 0 && (
         <>
           <h1>Select a Book</h1>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
             {books.map(book => (
               <Focusable key={book.book} onActivate={() => { setSelectedBook(book.book); setPage(1); }}>
-                <button
-                  style={{
-                    padding: '10px',
-                    background: '#007bff',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    outline: selectedBook === book.book ? '3px solid #28a745' : 'none', // Highlight selected button
-                    transition: 'outline 0.3s ease', // Smooth highlight transition
-                  }}
-                >
+                <ButtonItem layout="below">
                   {book.book}
-                </button>
+                </ButtonItem>
               </Focusable>
             ))}
           </div>
@@ -220,61 +189,26 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
             {chapters.map(chapter => (
               <Focusable key={chapter} onActivate={() => { setSelectedChapter(chapter); setPage(2); }}>
-                <button
-                  style={{
-                    padding: '10px',
-                    background: '#28a745',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    outline: selectedChapter === chapter ? '3px solid #28a745' : 'none', // Highlight selected button
-                    transition: 'outline 0.3s ease', // Smooth highlight transition
-                  }}
-                >
+                <ButtonItem layout="below">
                   Chapter {chapter}
-                </button>
+                </ButtonItem>
               </Focusable>
             ))}
           </div>
         </>
       )}
 
-      {/* Pagination Controls */}
       <div style={{ marginTop: '20px', textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '20px' }}>
         <Focusable onActivate={() => page > 0 && setPage(page - 1)}>
-          <button
-            style={{
-              padding: '10px',
-              background: page === 0 ? '#6c757d' : '#007bff', // Disabled button if page is 0
-              color: '#fff',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: page === 0 ? 'not-allowed' : 'pointer',
-              outline: page === 0 ? 'none' : '3px solid #28a745', // Highlight on focus
-              transition: 'outline 0.3s ease', // Smooth highlight transition
-            }}
-            disabled={page === 0}
-          >
+          <ButtonItem layout="below" disabled={page === 0}>
             Previous
-          </button>
+          </ButtonItem>
         </Focusable>
         
         <Focusable onActivate={handleNextChapter}>
-          <button
-            style={{
-              padding: '10px',
-              background: '#007bff', // Default background
-              color: '#fff',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              outline: 'none', // Remove default outline, we handle focus separately
-              transition: 'outline 0.3s ease', // Smooth highlight transition
-            }}
-          >
+          <ButtonItem layout="below">
             Next
-          </button>
+          </ButtonItem>
         </Focusable>
       </div>
     </div>

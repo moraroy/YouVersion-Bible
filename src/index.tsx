@@ -172,7 +172,8 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
                         borderRadius: '5px',
                         cursor: 'pointer',
                         outline: selectedVerse === verse ? '3px solid #28a745' : 'none', // Highlight selected button
-                        transition: 'outline 0.3s ease', // Smooth highlight transition
+                        transition: 'outline 0.3s ease, background 0.3s ease', // Smooth transition for background and outline
+                        backgroundColor: selectedVerse === verse ? '#28a745' : '#6f42c1', // Change background when selected
                       }}
                     >
                       Verse {verse}
@@ -203,7 +204,8 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
                     borderRadius: '5px',
                     cursor: 'pointer',
                     outline: selectedBook === book.book ? '3px solid #28a745' : 'none', // Highlight selected button
-                    transition: 'outline 0.3s ease', // Smooth highlight transition
+                    transition: 'outline 0.3s ease, background 0.3s ease', // Smooth transition for background and outline
+                    backgroundColor: selectedBook === book.book ? '#28a745' : '#007bff', // Change background when selected
                   }}
                 >
                   {book.book}
@@ -229,7 +231,8 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
                     borderRadius: '5px',
                     cursor: 'pointer',
                     outline: selectedChapter === chapter ? '3px solid #28a745' : 'none', // Highlight selected button
-                    transition: 'outline 0.3s ease', // Smooth highlight transition
+                    transition: 'outline 0.3s ease, background 0.3s ease', // Smooth transition for background and outline
+                    backgroundColor: selectedChapter === chapter ? '#28a745' : '#28a745', // Highlight chapter
                   }}
                 >
                   Chapter {chapter}

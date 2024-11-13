@@ -55,11 +55,8 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   // Fetch all verses for the selected chapter
   useEffect(() => {
     if (selectedBook && selectedChapter) {
-      // Normalize the book name by replacing "1st" and "2nd" prefixes
-      const normalizedBook = selectedBook.replace(/1st /, "1 ").replace(/2nd /, "2 ");
-      
       const chapterVerses = Object.keys(versesData)
-        .filter(key => key.startsWith(`${normalizedBook} ${selectedChapter}:`))
+        .filter(key => key.startsWith(`${selectedBook} ${selectedChapter}:`))
         .map(key => key.split(':')[1]); // Extract verse number
 
       setVerses(chapterVerses); // Set the verses for the selected chapter
@@ -294,3 +291,4 @@ export default definePlugin((serverAPI: ServerAPI) => {
     icon: <FaBible />,
   };
 });
+

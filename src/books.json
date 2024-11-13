@@ -57,42 +57,42 @@
             "chapters": 4
         },
         {
-            "book": "1st Samuel",
+            "book": "1 Samuel",
             "aliases": [
                 "1SA"
             ],
             "chapters": 31
         },
         {
-            "book": "2nd Samuel",
+            "book": "2 Samuel",
             "aliases": [
                 "2SA"
             ],
             "chapters": 24
         },
         {
-            "book": "1st Kings",
+            "book": "1 Kings",
             "aliases": [
                 "1KI"
             ],
             "chapters": 22
         },
         {
-            "book": "2nd Kings",
+            "book": "2 Kings",
             "aliases": [
                 "2KI"
             ],
             "chapters": 25
         },
         {
-            "book": "1st Chronicles",
+            "book": "1 Chronicles",
             "aliases": [
                 "1CH"
             ],
             "chapters": 29
         },
         {
-            "book": "2nd Chronicles",
+            "book": "2 Chronicles",
             "aliases": [
                 "2CH"
             ],
@@ -316,14 +316,14 @@
             "chapters": 16
         },
         {
-            "book": "1st Corinthians",
+            "book": "1 Corinthians",
             "aliases": [
                 "1CO"
             ],
             "chapters": 16
         },
         {
-            "book": "2nd Corinthians",
+            "book": "2 Corinthians",
             "aliases": [
                 "2CO"
             ],
@@ -358,28 +358,28 @@
             "chapters": 4
         },
         {
-            "book": "1st Thessalonians",
+            "book": "1 Thessalonians",
             "aliases": [
                 "1TH"
             ],
             "chapters": 5
         },
         {
-            "book": "2nd Thessalonians",
+            "book": "2 Thessalonians",
             "aliases": [
                 "2TH"
             ],
             "chapters": 3
         },
         {
-            "book": "1st Timothy",
+            "book": "1 Timothy",
             "aliases": [
                 "1TI"
             ],
             "chapters": 6
         },
         {
-            "book": "2nd Timothy",
+            "book": "2 Timothy",
             "aliases": [
                 "2TI"
             ],
@@ -414,35 +414,35 @@
             "chapters": 5
         },
         {
-            "book": "1st Peter",
+            "book": "1 Peter",
             "aliases": [
                 "1PE"
             ],
             "chapters": 5
         },
         {
-            "book": "2nd Peter",
+            "book": "2 Peter",
             "aliases": [
                 "2PE"
             ],
             "chapters": 3
         },
         {
-            "book": "1st John",
+            "book": "1 John",
             "aliases": [
                 "1JN"
             ],
             "chapters": 5
         },
         {
-            "book": "2nd John",
+            "book": "2 John",
             "aliases": [
                 "2JN"
             ],
             "chapters": 1
         },
         {
-            "book": "3rd John",
+            "book": "3 John",
             "aliases": [
                 "3JN"
             ],

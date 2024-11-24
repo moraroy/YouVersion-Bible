@@ -9,7 +9,12 @@ import { getVerseOfTheDay } from "@glowstudent/youversion"; // Ensure correct im
 
 // Define the Content component
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
-  const [verseOfTheDay, setVerseOfTheDay] = useState<{ citation: string; passage: string } | null>(null);
+  const [verseOfTheDay, setVerseOfTheDay] = useState<{
+    citation: string;
+    passage: string;
+    images: string[];  // Added images field
+    version: string;   // Added version field
+  } | null>(null);
   const [error, setError] = useState<string | null>(null); // To capture and display errors
   const [loading, setLoading] = useState<boolean>(true); // To show a loading state
 
@@ -27,7 +32,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
       setLoading(true); // Start loading
 
       // Fetch the Verse of the Day
-      const verseOfTheDay = await getVerseOfTheDay();
+      const verseOfTheDay = await getVerseOfTheDay("en"); // You can specify language here (e.g., "en")
 
       // Log the full response to understand its structure
       console.log("Full Verse of the Day Response:", JSON.stringify(verseOfTheDay, null, 2));
@@ -42,18 +47,22 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
       }
 
       // Check if the structure contains the expected fields
-      const { citation, passage } = verseOfTheDay;
+      const { citation, passage, images, version } = verseOfTheDay;
 
       // Log the checks
       console.log("Checking structure of the response...");
       console.log("Citation: ", citation);
       console.log("Passage: ", passage);
+      console.log("Version: ", version);
+      console.log("Images: ", images);
 
       if (citation && passage) {
         console.log("Verse of the Day: Valid structure");
         setVerseOfTheDay({
           citation: citation.toString(),
           passage: passage.toString(),
+          images: images ?? [], // Ensure images is always an array
+          version: version ?? "Unknown", // Default version if not found
         });
       } else {
         const invalidStructureMsg = `Invalid structure: Missing fields. Citation: ${citation}, Passage: ${passage}`;
@@ -91,6 +100,18 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
           <h2>Verse of the Day</h2>
           <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
+          <p><em>Version: {verseOfTheDay.version}</em></p>
+          
+          {verseOfTheDay.images.length > 0 && (
+            <div>
+              <h3>Images:</h3>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {verseOfTheDay.images.map((image, index) => (
+                  <img key={index} src={image} alt={`Image ${index + 1}`} style={{ maxWidth: '100%', marginBottom: '10px' }} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

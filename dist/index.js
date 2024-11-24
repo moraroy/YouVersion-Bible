@@ -50887,7 +50887,7 @@
           try {
               setLoading(true); // Start loading
               // Fetch the Verse of the Day
-              const verseOfTheDay = await dist.getVerseOfTheDay();
+              const verseOfTheDay = await dist.getVerseOfTheDay("en"); // You can specify language here (e.g., "en")
               // Log the full response to understand its structure
               console.log("Full Verse of the Day Response:", JSON.stringify(verseOfTheDay, null, 2));
               // Check if we received the expected response
@@ -50899,16 +50899,20 @@
                   return;
               }
               // Check if the structure contains the expected fields
-              const { citation, passage } = verseOfTheDay;
+              const { citation, passage, images, version } = verseOfTheDay;
               // Log the checks
               console.log("Checking structure of the response...");
               console.log("Citation: ", citation);
               console.log("Passage: ", passage);
+              console.log("Version: ", version);
+              console.log("Images: ", images);
               if (citation && passage) {
                   console.log("Verse of the Day: Valid structure");
                   setVerseOfTheDay({
                       citation: citation.toString(),
                       passage: passage.toString(),
+                      images: images ?? [],
+                      version: version ?? "Unknown", // Default version if not found
                   });
               }
               else {
@@ -50941,7 +50945,14 @@
               window.SP_REACT.createElement("h2", null, "Verse of the Day"),
               window.SP_REACT.createElement("p", null,
                   window.SP_REACT.createElement("strong", null, verseOfTheDay.citation)),
-              window.SP_REACT.createElement("p", null, verseOfTheDay.passage)))));
+              window.SP_REACT.createElement("p", null, verseOfTheDay.passage),
+              window.SP_REACT.createElement("p", null,
+                  window.SP_REACT.createElement("em", null,
+                      "Version: ",
+                      verseOfTheDay.version)),
+              verseOfTheDay.images.length > 0 && (window.SP_REACT.createElement("div", null,
+                  window.SP_REACT.createElement("h3", null, "Images:"),
+                  window.SP_REACT.createElement("div", { style: { display: 'flex', flexDirection: 'column' } }, verseOfTheDay.images.map((image, index) => (window.SP_REACT.createElement("img", { key: index, src: image, alt: `Image ${index + 1}`, style: { maxWidth: '100%', marginBottom: '10px' } }))))))))));
   };
   var index = deckyFrontendLib.definePlugin((serverAPI) => {
       return {

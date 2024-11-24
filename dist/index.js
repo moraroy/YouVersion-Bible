@@ -50870,7 +50870,7 @@
   Object.defineProperty(exports, "getVerse", { enumerable: true, get: function () { return verse_1.getVerse; } });
   }(dist));
 
-  // Define the Content component that will be displayed in the plugin UI
+  // Define the Content component
   const Content = ({ serverAPI }) => {
       const [verseOfTheDay, setVerseOfTheDay] = React.useState(null);
       const [error, setError] = React.useState(null); // To capture and display errors
@@ -50888,12 +50888,18 @@
               setLoading(true); // Start loading
               // Fetch the Verse of the Day
               const verseOfTheDay = await dist.getVerseOfTheDay();
+              // Log the full response to understand its structure
+              console.log("Full Verse of the Day Response:", verseOfTheDay);
               // Check if we received the expected response
               if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
-                  console.log("Verse of the Day:", verseOfTheDay); // Log to console
-                  setVerseOfTheDay({ citation: verseOfTheDay.citation.toString(), passage: verseOfTheDay.passage.toString() });
+                  console.log("Verse of the Day:", verseOfTheDay); // Log the verse of the day to console
+                  setVerseOfTheDay({
+                      citation: verseOfTheDay.citation.toString(),
+                      passage: verseOfTheDay.passage.toString(),
+                  });
               }
               else {
+                  // Handle case when structure is unexpected
                   throw new Error("Invalid response structure from API.");
               }
           }
@@ -50909,7 +50915,6 @@
       React.useEffect(() => {
           logVerseOfTheDay();
       }, [serverAPI]);
-      // JSX to render the UI
       return (window.SP_REACT.createElement("div", null,
           window.SP_REACT.createElement("h1", null, "Logged Information from GlowStudent API"),
           loading && window.SP_REACT.createElement("p", null, "Loading verse of the day..."),
@@ -50924,7 +50929,6 @@
                   window.SP_REACT.createElement("strong", null, verseOfTheDay.citation)),
               window.SP_REACT.createElement("p", null, verseOfTheDay.passage)))));
   };
-  // Export as a Decky plugin
   var index = deckyFrontendLib.definePlugin((serverAPI) => {
       return {
           title: window.SP_REACT.createElement("div", { className: deckyFrontendLib.staticClasses.Title }, "YouVersion"),

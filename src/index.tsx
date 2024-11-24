@@ -1,9 +1,13 @@
-import { definePlugin, ServerAPI, staticClasses } from "decky-frontend-lib"; // Decky Plugin imports
-import { useEffect, useState, VFC } from "react"; // React imports
-import { FaBible } from "react-icons/fa"; // Bible icon from react-icons
-import { getVerseOfTheDay } from "@glowstudent/youversion"; // YouVersion API
+import {
+  definePlugin,
+  ServerAPI,
+  staticClasses,
+} from "decky-frontend-lib";
+import { useEffect, useState, VFC } from "react";
+import { FaBible } from "react-icons/fa";
+import { getVerseOfTheDay } from "@glowstudent/youversion";
 
-// Define the Content component that will be displayed in the plugin UI
+// Define the Content component
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   const [verseOfTheDay, setVerseOfTheDay] = useState<{ citation: string; passage: string } | null>(null);
   const [error, setError] = useState<string | null>(null); // To capture and display errors
@@ -25,11 +29,18 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
       // Fetch the Verse of the Day
       const verseOfTheDay = await getVerseOfTheDay();
 
+      // Log the full response to understand its structure
+      console.log("Full Verse of the Day Response:", verseOfTheDay);
+
       // Check if we received the expected response
       if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
-        console.log("Verse of the Day:", verseOfTheDay); // Log to console
-        setVerseOfTheDay({ citation: verseOfTheDay.citation.toString(), passage: verseOfTheDay.passage.toString() });
+        console.log("Verse of the Day:", verseOfTheDay); // Log the verse of the day to console
+        setVerseOfTheDay({
+          citation: verseOfTheDay.citation.toString(),
+          passage: verseOfTheDay.passage.toString(),
+        });
       } else {
+        // Handle case when structure is unexpected
         throw new Error("Invalid response structure from API.");
       }
     } catch (error) {
@@ -45,20 +56,19 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     logVerseOfTheDay();
   }, [serverAPI]);
 
-  // JSX to render the UI
   return (
     <div>
       <h1>Logged Information from GlowStudent API</h1>
 
       {loading && <p>Loading verse of the day...</p>} {/* Loading state */}
-
+      
       {error && !loading && (  // Error display
         <div style={{ color: 'red', border: '1px solid red', padding: '10px', marginBottom: '10px' }}>
           <h2>Error:</h2>
           <p>{error}</p>
         </div>
       )}
-
+      
       {verseOfTheDay && !loading && (
         <div>
           <h2>Verse of the Day</h2>
@@ -70,7 +80,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   );
 };
 
-// Export as a Decky plugin
 export default definePlugin((serverAPI: ServerAPI) => {
   return {
     title: <div className={staticClasses.Title}>YouVersion</div>,
@@ -78,4 +87,3 @@ export default definePlugin((serverAPI: ServerAPI) => {
     icon: <FaBible />,
   };
 });
-

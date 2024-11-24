@@ -50870,73 +50870,65 @@
   Object.defineProperty(exports, "getVerse", { enumerable: true, get: function () { return verse_1.getVerse; } });
   }(dist));
 
-  class notify {
-      static setServer(serv) {
-          this.serverAPI = serv;
-      }
-      static toast(title, message) {
-          if (!this.serverAPI || !this.serverAPI.toaster) {
-              console.error("serverAPI or toaster is not defined");
+  // Define the Content component that will be displayed in the plugin UI
+  const Content = ({ serverAPI }) => {
+      const [verseOfTheDay, setVerseOfTheDay] = React.useState(null);
+      const [error, setError] = React.useState(null); // To capture and display errors
+      const [loading, setLoading] = React.useState(true); // To show a loading state
+      // Function to log Verse of the Day to console and handle errors
+      const logVerseOfTheDay = async () => {
+          if (!serverAPI) {
+              const errMsg = "serverAPI is not defined";
+              console.error(errMsg); // Log the error
+              setError(errMsg); // Show the error to the user
+              setLoading(false);
               return;
           }
           try {
-              this.serverAPI.toaster.toast({
-                  title: title,
-                  body: message,
-                  duration: 8000,
-              });
-          }
-          catch (e) {
-              console.error("Toaster Error", e);
-          }
-      }
-      static async toastVerseOfTheDay() {
-          if (!this.serverAPI) {
-              console.error("serverAPI is not defined");
-              return;
-          }
-          try {
+              setLoading(true); // Start loading
+              // Fetch the Verse of the Day
               const verseOfTheDay = await dist.getVerseOfTheDay();
+              // Check if we received the expected response
               if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
-                  this.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
+                  console.log("Verse of the Day:", verseOfTheDay); // Log to console
+                  setVerseOfTheDay({ citation: verseOfTheDay.citation.toString(), passage: verseOfTheDay.passage.toString() });
+              }
+              else {
+                  throw new Error("Invalid response structure from API.");
               }
           }
           catch (error) {
-              console.error("Failed to fetch the verse of the day:", error);
+              console.error("Failed to fetch the verse of the day:", error); // Log the error
+              setError(`Failed to fetch the verse of the day: ${error instanceof Error ? error.message : error}`); // Show the error to the user
           }
-      }
-  }
-
-  const Content = ({ serverAPI }) => {
-      const [verseOfTheDay, setVerseOfTheDay] = React.useState(null);
+          finally {
+              setLoading(false); // Stop loading after the request completes
+          }
+      };
+      // Call logVerseOfTheDay when the component is mounted
       React.useEffect(() => {
-          // Set the serverAPI in the notify class
-          notify.setServer(serverAPI);
-          // Display the verse of the day as a toast notification when the plugin is loaded
-          (async () => {
-              try {
-                  const verseOfTheDay = await dist.getVerseOfTheDay();
-                  if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
-                      notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
-                      // Also set the verse of the day in the state
-                      setVerseOfTheDay({ citation: verseOfTheDay.citation.toString(), passage: verseOfTheDay.passage.toString() });
-                  }
-              }
-              catch (error) {
-                  console.error("Failed to fetch the verse of the day:", error);
-              }
-          })();
-      }, [serverAPI]); // Only run once, when the component mounts
-      return (window.SP_REACT.createElement("div", null, verseOfTheDay ? (window.SP_REACT.createElement("div", null,
-          window.SP_REACT.createElement("h2", null, "Verse of the Day"),
-          window.SP_REACT.createElement("p", null,
-              window.SP_REACT.createElement("strong", null, verseOfTheDay.citation)),
-          window.SP_REACT.createElement("p", null, verseOfTheDay.passage))) : (window.SP_REACT.createElement("p", null, "Loading verse of the day..."))));
+          logVerseOfTheDay();
+      }, [serverAPI]);
+      // JSX to render the UI
+      return (window.SP_REACT.createElement("div", null,
+          window.SP_REACT.createElement("h1", null, "Logged Information from GlowStudent API"),
+          loading && window.SP_REACT.createElement("p", null, "Loading verse of the day..."),
+          " ",
+          error && !loading && ( // Error display
+          window.SP_REACT.createElement("div", { style: { color: 'red', border: '1px solid red', padding: '10px', marginBottom: '10px' } },
+              window.SP_REACT.createElement("h2", null, "Error:"),
+              window.SP_REACT.createElement("p", null, error))),
+          verseOfTheDay && !loading && (window.SP_REACT.createElement("div", null,
+              window.SP_REACT.createElement("h2", null, "Verse of the Day"),
+              window.SP_REACT.createElement("p", null,
+                  window.SP_REACT.createElement("strong", null, verseOfTheDay.citation)),
+              window.SP_REACT.createElement("p", null, verseOfTheDay.passage)))));
   };
-  var index = deckyFrontendLib.definePlugin((serverApi) => {
+  // Export as a Decky plugin
+  var index = deckyFrontendLib.definePlugin((serverAPI) => {
       return {
           title: window.SP_REACT.createElement("div", { className: deckyFrontendLib.staticClasses.Title }, "YouVersion"),
-          content: window.SP_REACT.createElement(Content, { serverAPI: serverApi }),
+          content: window.SP_REACT.createElement(Content, { serverAPI: serverAPI }),
           icon: window.SP_REACT.createElement(FaBible, null),
       };
   });

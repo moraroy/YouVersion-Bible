@@ -50915,25 +50915,23 @@
           // Display the verse of the day as a toast notification when the plugin is loaded
           (async () => {
               try {
-                  const verseOfTheDay = await dist.getVerseOfTheDay(); // Removed serverAPI argument
+                  const verseOfTheDay = await dist.getVerseOfTheDay();
                   if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
                       notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
                       // Also set the verse of the day in the state
-                      setVerseOfTheDay({
-                          citation: verseOfTheDay.citation.toString(),
-                          passage: verseOfTheDay.passage.toString(),
-                      });
+                      setVerseOfTheDay({ citation: verseOfTheDay.citation.toString(), passage: verseOfTheDay.passage.toString() });
                   }
               }
               catch (error) {
                   console.error("Failed to fetch the verse of the day:", error);
               }
           })();
-      }, [serverAPI]);
-      return (window.SP_REACT.createElement("div", null, verseOfTheDay && (window.SP_REACT.createElement("div", null,
+      }, [serverAPI]); // Only run once, when the component mounts
+      return (window.SP_REACT.createElement("div", null, verseOfTheDay ? (window.SP_REACT.createElement("div", null,
           window.SP_REACT.createElement("h2", null, "Verse of the Day"),
-          window.SP_REACT.createElement("p", null, verseOfTheDay.citation),
-          window.SP_REACT.createElement("p", null, verseOfTheDay.passage)))));
+          window.SP_REACT.createElement("p", null,
+              window.SP_REACT.createElement("strong", null, verseOfTheDay.citation)),
+          window.SP_REACT.createElement("p", null, verseOfTheDay.passage))) : (window.SP_REACT.createElement("p", null, "Loading verse of the day..."))));
   };
   var index = deckyFrontendLib.definePlugin((serverApi) => {
       return {

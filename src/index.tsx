@@ -18,29 +18,28 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     // Display the verse of the day as a toast notification when the plugin is loaded
     (async () => {
       try {
-        const verseOfTheDay = await getVerseOfTheDay(); // Removed serverAPI argument
+        const verseOfTheDay = await getVerseOfTheDay();
         if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
           notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
           // Also set the verse of the day in the state
-          setVerseOfTheDay({
-            citation: verseOfTheDay.citation.toString(),
-            passage: verseOfTheDay.passage.toString(),
-          });
+          setVerseOfTheDay({ citation: verseOfTheDay.citation.toString(), passage: verseOfTheDay.passage.toString() });
         }
       } catch (error) {
         console.error("Failed to fetch the verse of the day:", error);
       }
     })();
-  }, [serverAPI]);
+  }, [serverAPI]); // Only run once, when the component mounts
 
   return (
     <div>
-      {verseOfTheDay && (
+      {verseOfTheDay ? (
         <div>
           <h2>Verse of the Day</h2>
-          <p>{verseOfTheDay.citation}</p>
+          <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
         </div>
+      ) : (
+        <p>Loading verse of the day...</p>
       )}
     </div>
   );

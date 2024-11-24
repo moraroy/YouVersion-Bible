@@ -5,7 +5,6 @@ import {
 } from "decky-frontend-lib";
 import { useEffect, useState, VFC } from "react";
 import { FaBible } from "react-icons/fa";
-import { getVerseOfTheDay } from "@glowstudent/youversion"; // Ensure correct import path
 
 // Define the Content component
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
@@ -31,14 +30,24 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     try {
       setLoading(true); // Start loading
 
-      // Fetch the Verse of the Day
-      const verseOfTheDay = await getVerseOfTheDay("en"); // You can specify language here (e.g., "en")
+      // Fetch the Verse of the Day from the backend (main.py server)
+      const response = await fetch("http://localhost:8777/api/verse-of-the-day");
+
+      if (!response.ok) {
+        const fetchError = `Error: ${response.statusText}`;
+        console.error(fetchError); // Log the fetch error
+        setError(fetchError); // Show the error to the user
+        setLoading(false);
+        return;
+      }
+
+      const data = await response.json();
 
       // Log the full response to understand its structure
-      console.log("Full Verse of the Day Response:", JSON.stringify(verseOfTheDay, null, 2));
+      console.log("Full Verse of the Day Response:", JSON.stringify(data, null, 2));
 
       // Check if we received the expected response
-      if (!verseOfTheDay) {
+      if (!data) {
         const noDataMsg = "No data received from the API.";
         console.error(noDataMsg); // Log the error
         setError(noDataMsg); // Show the error to the user
@@ -46,8 +55,8 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
         return;
       }
 
-      // Check if the structure contains the expected fields
-      const { citation, passage, images, version } = verseOfTheDay;
+      // Destructure the response to get citation, passage, images, and version
+      const { citation, passage, images, version } = data;
 
       // Log the checks
       console.log("Checking structure of the response...");
@@ -84,7 +93,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 
   return (
     <div>
-      <h1>Logged Information from GlowStudent API</h1>
+      <h1>Verse of the Day</h1>
 
       {loading && <p>Loading verse of the day...</p>} {/* Loading state */}
       
@@ -97,8 +106,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
       
       {verseOfTheDay && !loading && (
         <div>
-          <h2>Verse of the Day</h2>
-          <p><strong>{verseOfTheDay.citation}</strong></p>
+          <h2>{verseOfTheDay.citation}</h2>
           <p>{verseOfTheDay.passage}</p>
           <p><em>Version: {verseOfTheDay.version}</em></p>
           

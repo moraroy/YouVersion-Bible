@@ -30,18 +30,35 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
       const verseOfTheDay = await getVerseOfTheDay();
 
       // Log the full response to understand its structure
-      console.log("Full Verse of the Day Response:", verseOfTheDay);
+      console.log("Full Verse of the Day Response:", JSON.stringify(verseOfTheDay, null, 2));
 
       // Check if we received the expected response
-      if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
-        console.log("Verse of the Day:", verseOfTheDay); // Log the verse of the day to console
+      if (!verseOfTheDay) {
+        const noDataMsg = "No data received from the API.";
+        console.error(noDataMsg); // Log the error
+        setError(noDataMsg); // Show the error to the user
+        setLoading(false);
+        return;
+      }
+
+      // Check if the structure contains the expected fields
+      const { citation, passage } = verseOfTheDay;
+
+      // Log the checks
+      console.log("Checking structure of the response...");
+      console.log("Citation: ", citation);
+      console.log("Passage: ", passage);
+
+      if (citation && passage) {
+        console.log("Verse of the Day: Valid structure");
         setVerseOfTheDay({
-          citation: verseOfTheDay.citation.toString(),
-          passage: verseOfTheDay.passage.toString(),
+          citation: citation.toString(),
+          passage: passage.toString(),
         });
       } else {
-        // Handle case when structure is unexpected
-        throw new Error("Invalid response structure from API.");
+        const invalidStructureMsg = `Invalid structure: Missing fields. Citation: ${citation}, Passage: ${passage}`;
+        console.error(invalidStructureMsg); // Log the error
+        setError(invalidStructureMsg); // Show the error to the user
       }
     } catch (error) {
       console.error("Failed to fetch the verse of the day:", error); // Log the error

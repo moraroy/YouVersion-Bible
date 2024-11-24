@@ -50870,54 +50870,71 @@
   Object.defineProperty(exports, "getVerse", { enumerable: true, get: function () { return verse_1.getVerse; } });
   }(dist));
 
+  class notify {
+      static setServer(serv) {
+          this.serverAPI = serv;
+      }
+      static toast(title, message) {
+          if (!this.serverAPI || !this.serverAPI.toaster) {
+              console.error("serverAPI or toaster is not defined");
+              return;
+          }
+          try {
+              this.serverAPI.toaster.toast({
+                  title: title,
+                  body: message,
+                  duration: 8000,
+              });
+          }
+          catch (e) {
+              console.error("Toaster Error", e);
+          }
+      }
+      static async toastVerseOfTheDay() {
+          if (!this.serverAPI) {
+              console.error("serverAPI is not defined");
+              return;
+          }
+          try {
+              const verseOfTheDay = await dist.getVerseOfTheDay();
+              if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
+                  this.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
+              }
+          }
+          catch (error) {
+              console.error("Failed to fetch the verse of the day:", error);
+          }
+      }
+  }
+
   const Content = ({ serverAPI }) => {
       const [verseOfTheDay, setVerseOfTheDay] = React.useState(null);
-      // This will hold the serverAPI for later use (if needed)
-      const [serverAPIInstance, setServerAPIInstance] = React.useState(null);
-      // Set the serverAPI instance when the component is mounted
       React.useEffect(() => {
-          if (serverAPI) {
-              setServerAPIInstance(serverAPI);
-          }
-      }, [serverAPI]);
-      // Fetch the Verse of the Day when the component mounts
-      React.useEffect(() => {
-          // Fetch Verse of the Day from API and set it in the state
-          const fetchVerseOfTheDay = async () => {
+          // Set the serverAPI in the notify class
+          notify.setServer(serverAPI);
+          // Display the verse of the day as a toast notification when the plugin is loaded
+          (async () => {
               try {
-                  const verse = await dist.getVerseOfTheDay(); // Fetch without passing serverAPI
-                  // Ensure that verse is in the expected format
-                  if (verse && 'citation' in verse && 'passage' in verse) {
+                  const verseOfTheDay = await dist.getVerseOfTheDay(); // Removed serverAPI argument
+                  if (verseOfTheDay && 'citation' in verseOfTheDay && 'passage' in verseOfTheDay) {
+                      notify.toast(verseOfTheDay.citation.toString(), verseOfTheDay.passage.toString());
+                      // Also set the verse of the day in the state
                       setVerseOfTheDay({
-                          citation: verse.citation.toString(),
-                          passage: verse.passage.toString(),
+                          citation: verseOfTheDay.citation.toString(),
+                          passage: verseOfTheDay.passage.toString(),
                       });
-                      // Notify the user (you can customize this part as needed)
-                      if (serverAPIInstance && serverAPIInstance.toaster) {
-                          serverAPIInstance.toaster.toast({
-                              title: verse.citation.toString(),
-                              body: verse.passage.toString(),
-                              duration: 8000,
-                          });
-                      }
-                  }
-                  else {
-                      console.error("Verse of the day is not in the expected format:", verse);
                   }
               }
               catch (error) {
                   console.error("Failed to fetch the verse of the day:", error);
               }
-          };
-          fetchVerseOfTheDay();
-      }, [serverAPIInstance]); // Dependency array to refetch if serverAPIInstance changes
-      return (window.SP_REACT.createElement("div", null, verseOfTheDay ? (window.SP_REACT.createElement("div", null,
+          })();
+      }, [serverAPI]);
+      return (window.SP_REACT.createElement("div", null, verseOfTheDay && (window.SP_REACT.createElement("div", null,
           window.SP_REACT.createElement("h2", null, "Verse of the Day"),
-          window.SP_REACT.createElement("p", null,
-              window.SP_REACT.createElement("strong", null, verseOfTheDay.citation)),
-          window.SP_REACT.createElement("p", null, verseOfTheDay.passage))) : (window.SP_REACT.createElement("p", null, "Loading Verse of the Day..."))));
+          window.SP_REACT.createElement("p", null, verseOfTheDay.citation),
+          window.SP_REACT.createElement("p", null, verseOfTheDay.passage)))));
   };
-  // Define the plugin
   var index = deckyFrontendLib.definePlugin((serverApi) => {
       return {
           title: window.SP_REACT.createElement("div", { className: deckyFrontendLib.staticClasses.Title }, "YouVersion"),

@@ -5,7 +5,7 @@ import {
 } from "decky-frontend-lib";
 import { useEffect, useState, VFC } from "react";
 import { FaBible } from "react-icons/fa";
-import { getVerseOfTheDay } from "@glowstudent/youversion";
+import { getVerseOfTheDay } from "@glowstudent/youversion"; // Ensure correct import path
 
 // Define the Content component
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {

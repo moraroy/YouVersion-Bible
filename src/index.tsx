@@ -29,9 +29,13 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 
     try {
       setLoading(true); // Start loading
+      console.log("Fetching Verse of the Day...");
 
       // Fetch the Verse of the Day from the backend (main.py server)
       const response = await fetch("http://localhost:8777/api/verse-of-the-day");
+
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers);
 
       if (!response.ok) {
         const fetchError = `Error: ${response.statusText}`;
@@ -88,8 +92,9 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 
   // Call logVerseOfTheDay when the component is mounted
   useEffect(() => {
+    console.log("Component mounted. Calling logVerseOfTheDay...");
     logVerseOfTheDay();
-  }, [serverAPI]);
+  }, [serverAPI]); // Ensure the effect runs when serverAPI is available
 
   return (
     <div>
@@ -127,6 +132,8 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 };
 
 export default definePlugin((serverAPI: ServerAPI) => {
+  console.log("Defining plugin...");
+
   return {
     title: <div className={staticClasses.Title}>YouVersion</div>,
     content: <Content serverAPI={serverAPI} />,

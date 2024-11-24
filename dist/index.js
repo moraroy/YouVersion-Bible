@@ -97,8 +97,11 @@
           }
           try {
               setLoading(true); // Start loading
+              console.log("Fetching Verse of the Day...");
               // Fetch the Verse of the Day from the backend (main.py server)
               const response = await fetch("http://localhost:8777/api/verse-of-the-day");
+              console.log("Response status:", response.status);
+              console.log("Response headers:", response.headers);
               if (!response.ok) {
                   const fetchError = `Error: ${response.statusText}`;
                   console.error(fetchError); // Log the fetch error
@@ -150,8 +153,9 @@
       };
       // Call logVerseOfTheDay when the component is mounted
       React.useEffect(() => {
+          console.log("Component mounted. Calling logVerseOfTheDay...");
           logVerseOfTheDay();
-      }, [serverAPI]);
+      }, [serverAPI]); // Ensure the effect runs when serverAPI is available
       return (window.SP_REACT.createElement("div", null,
           window.SP_REACT.createElement("h1", null, "Verse of the Day"),
           loading && window.SP_REACT.createElement("p", null, "Loading verse of the day..."),
@@ -172,6 +176,7 @@
                   window.SP_REACT.createElement("div", { style: { display: 'flex', flexDirection: 'column' } }, verseOfTheDay.images.map((image, index) => (window.SP_REACT.createElement("img", { key: index, src: image, alt: `Image ${index + 1}`, style: { maxWidth: '100%', marginBottom: '10px' } }))))))))));
   };
   var index = deckyFrontendLib.definePlugin((serverAPI) => {
+      console.log("Defining plugin...");
       return {
           title: window.SP_REACT.createElement("div", { className: deckyFrontendLib.staticClasses.Title }, "YouVersion"),
           content: window.SP_REACT.createElement(Content, { serverAPI: serverAPI }),

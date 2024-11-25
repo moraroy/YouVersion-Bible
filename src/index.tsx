@@ -31,6 +31,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     setLoading(true);
     console.log("Connecting to WebSocket for Verse of the Day...");
 
+    // Replace with actual WebSocket endpoint
     const socket = new WebSocket("ws://localhost:8777/votd_ws");
 
     socket.onopen = () => {
@@ -68,7 +69,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 
   useEffect(() => {
     fetchVerseOfTheDay();  // Fetch VOTD via WebSocket when component mounts
-  }, [serverAPI]);
+  }, [serverAPI]);  // Re-run when serverAPI changes
 
   // Update available chapters for the selected book
   useEffect(() => {
@@ -85,113 +86,162 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     if (selectedBook && selectedChapter) {
       const chapterVerses = Object.keys(versesData)
         .filter(key => key.startsWith(`${selectedBook} ${selectedChapter}:`))
-        .map(key => key.split(':')[1]);  // Extract verse number
+        .map(key => key.split(':')[1]); // Extract verse number
 
-      setVerses(chapterVerses);  // Set verses for the selected chapter
+      setVerses(chapterVerses); // Set the verses for the selected chapter
     }
   }, [selectedBook, selectedChapter]);
 
   // Fetch individual verse content when selected
   useEffect(() => {
     if (selectedBook && selectedChapter && selectedVerse) {
-      const verseKey = `${selectedBook} ${selectedChapter}:${selectedVerse}`;
-      const verseContent = versesData[verseKey];
-
-      setVerseText(verseContent || "Verse not found.");
+      (async () => {
+        try {
+          let verse = await getVerse(selectedBook, selectedChapter.toString(), selectedVerse.toString());
+          if (verse && 'passage' in verse && typeof verse.passage === 'string') {
+            setVerseText(verse.passage);
+          } else {
+            const verseKey = `${selectedBook} ${selectedChapter}:${selectedVerse}`;
+            const offlineVerse = versesData[verseKey];
+            if (offlineVerse) {
+              setVerseText(offlineVerse);
+            } else {
+              setVerseText("Verse not found.");
+            }
+          }
+        } catch (error) {
+          const verseKey = `${selectedBook} ${selectedChapter}:${selectedVerse}`;
+          const offlineVerse = versesData[verseKey];
+          if (offlineVerse) {
+            setVerseText(offlineVerse);
+          } else {
+            setVerseText("Verse not found.");
+          }
+        }
+      })();
     }
   }, [selectedBook, selectedChapter, selectedVerse]);
 
+  // Construct the title for the selected chapter
+  const selectedChapterTitle = selectedBook && selectedChapter
+    ? `${selectedBook} Chapter ${selectedChapter}`
+    : "Selected Chapter";
+
+  // Format the reference for the selected verse
+  const selectedVerseReference = selectedBook && selectedChapter && selectedVerse
+    ? `${selectedBook} ${selectedChapter}:${selectedVerse}`
+    : "";
+
+  // Handle the "Next" button behavior to move to the next chapter
+  const handleNextChapter = () => {
+    if (selectedBook && selectedChapter !== null) {
+      const bookData = books.find(book => book.book === selectedBook);
+      if (bookData) {
+        const nextChapter = selectedChapter + 1;
+        if (nextChapter <= bookData.chapters) {
+          setSelectedChapter(nextChapter);
+          scrollToTopRef.current?.scrollIntoView({ behavior: 'smooth' }); // Scroll to top
+        } else {
+          // Optionally, move to next book if there's no next chapter
+          const nextBookIndex = books.findIndex(book => book.book === selectedBook) + 1;
+          if (nextBookIndex < books.length) {
+            setSelectedBook(books[nextBookIndex].book);
+            setSelectedChapter(1); // Move to first chapter of the next book
+          }
+        }
+      }
+    }
+  };
+
+  // Read aloud a given verse or passage
+  const readVerseAloud = (text: string) => {
+    const speech = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.speak(speech);
+  };
+
   return (
-    <div ref={scrollToTopRef} style={{ padding: '20px' }}>
-      {/* Verse of the Day Section */}
-      {loading && <p>Loading verse of the day...</p>}
-
-      {error && !loading && (
-        <div style={{ color: 'red', border: '1px solid red', padding: '10px', marginBottom: '10px' }}>
-          <h2>Error:</h2>
-          <p>{error}</p>
-        </div>
-      )}
-
-      {verseOfTheDay && !loading && (
-        <div>
-          <h2>{verseOfTheDay.citation}</h2>
+    <div ref={scrollToTopRef} style={{ padding: '20px', backgroundColor: '#fff' }}>
+      {verseOfTheDay && (
+        <div style={{ marginBottom: '20px', background: '#f9f9f9', padding: '15px', borderRadius: '5px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+          <h2>Verse of the Day</h2>
+          <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
-          <p><em>Version: {verseOfTheDay.version}</em></p>
-
-          {verseOfTheDay.images.length > 0 && (
-            <div>
-              <h3>Images:</h3>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {verseOfTheDay.images.map((image, index) => (
-                  <img key={index} src={image} alt={`Image ${index + 1}`} style={{ maxWidth: '100%', marginBottom: '10px' }} />
-                ))}
-              </div>
-            </div>
-          )}
+          <button onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)} style={{ marginTop: '10px', padding: '10px 15px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '5px' }}>Read Aloud</button>
         </div>
       )}
 
-      {/* Book Selection */}
-      <div>
-        <h1>Select a Book</h1>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
-          {books.map(book => (
-            <Focusable key={book.book} onActivate={() => { setSelectedBook(book.book); setChapters([]); }}>
-              <button style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px' }}>
-                {book.book}
-              </button>
-            </Focusable>
-          ))}
-        </div>
-      </div>
-
-      {/* Chapter Selection */}
-      {selectedBook && (
-        <div>
-          <h2>Select a Chapter for {selectedBook}</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
-            {chapters.map(chapter => (
-              <Focusable key={chapter} onActivate={() => { setSelectedChapter(chapter); setVerses([]); }}>
-                <button style={{ padding: '10px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '5px' }}>
-                  Chapter {chapter}
-                </button>
-              </Focusable>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Verse Selection */}
-      {selectedBook && selectedChapter && verses.length > 0 && (
-        <div>
-          <h2>Verses for {selectedBook} Chapter {selectedChapter}</h2>
-          <div>
-            {verses.map((verse, index) => (
-              <div key={index}>
-                <Focusable onActivate={() => { setSelectedVerse(verse); }}>
-                  <button style={{ padding: '10px', background: '#6f42c1', color: '#fff', border: 'none', borderRadius: '5px' }}>
-                    Verse {verse}
-                  </button>
-                </Focusable>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Selected Verse Content */}
-      {selectedVerse && (
-        <div>
-          <h3>{`${selectedBook} ${selectedChapter}:${selectedVerse}`}</h3>
+      {/* Verse Text Display for individual selected verse */}
+      {verseText && (
+        <div style={{ marginBottom: '20px', padding: '15px', background: '#f0f0f0', borderRadius: '5px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+          <h2>{selectedVerseReference}</h2>
           <p>{verseText}</p>
+          <button onClick={() => readVerseAloud(verseText)} style={{ marginTop: '10px', padding: '10px 15px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '5px' }}>Read Aloud</button>
         </div>
       )}
+
+      {/* Full Chapter Display */}
+      {verses.length > 0 && (
+        <div style={{ marginBottom: '20px', padding: '15px', background: '#f0f0f0', borderRadius: '5px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+          <h2>{selectedChapterTitle}</h2>
+          <div>
+            {verses.map((verse) => (
+              <button
+                key={verse}
+                onClick={() => setSelectedVerse(verse)}
+                style={{
+                  margin: '5px',
+                  padding: '10px 15px',
+                  background: selectedVerse === verse ? '#28a745' : '#6f42c1',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                }}
+              >
+                Verse {verse}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Page Navigation */}
+      <div style={{ marginTop: '20px', textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '20px' }}>
+        <Focusable onActivate={() => setSelectedChapter(selectedChapter! - 1)}>
+          <button
+            style={{
+              padding: '10px',
+              background: selectedChapter === 1 ? '#6c757d' : '#007bff',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: selectedChapter === 1 ? 'not-allowed' : 'pointer',
+            }}
+            disabled={selectedChapter === 1}
+          >
+            Previous
+          </button>
+        </Focusable>
+
+        <Focusable onActivate={handleNextChapter}>
+          <button
+            style={{
+              padding: '10px',
+              background: '#007bff',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+            }}
+          >
+            Next
+          </button>
+        </Focusable>
+      </div>
     </div>
   );
 };
 
-// Define the Decky plugin to render the content
 export default definePlugin((serverAPI: ServerAPI) => {
   return {
     title: <div className={staticClasses.Title}>YouVersion</div>,

@@ -86,24 +86,24 @@
       const [verseOfTheDay, setVerseOfTheDay] = React.useState(null);
       const [error, setError] = React.useState(null);
       const [loading, setLoading] = React.useState(true);
-      // Fetch Verse of the Day from the backend
-      const fetchVerseOfTheDay = async () => {
-          try {
-              setLoading(true);
-              console.log("Fetching Verse of the Day...");
-              // Fetch the Verse of the Day from the backend (assuming it's served at http://localhost:8777/votd)
-              const response = await fetch("http://localhost:8777/votd");
-              if (!response.ok) {
-                  throw new Error(`Error: ${response.statusText}`);
+      // Function to handle WebSocket connection and receive VOTD data
+      const fetchVerseOfTheDay = () => {
+          setLoading(true);
+          console.log("Connecting to WebSocket for Verse of the Day...");
+          // Connect to the WebSocket server
+          const socket = new WebSocket("ws://localhost:8777/votd_ws");
+          socket.onopen = () => {
+              console.log("WebSocket connected");
+          };
+          socket.onmessage = (event) => {
+              const data = JSON.parse(event.data);
+              console.log("Received Verse of the Day:", data);
+              if (data.error) {
+                  setError(data.error);
               }
-              const data = await response.json();
-              // Check if we received the expected response
-              if (!data) {
-                  throw new Error("No data received from the API.");
-              }
-              // Destructure the response to get citation, passage, images, and version
-              const { citation, passage, images, version } = data;
-              if (citation && passage) {
+              else {
+                  // Set the verse data in state
+                  const { citation, passage, images, version } = data;
                   setVerseOfTheDay({
                       citation: citation.toString(),
                       passage: passage.toString(),
@@ -111,20 +111,19 @@
                       version: version ?? "Unknown",
                   });
               }
-              else {
-                  throw new Error(`Invalid structure: Missing fields. Citation: ${citation}, Passage: ${passage}`);
-              }
-          }
-          catch (error) {
-              console.error("Failed to fetch the verse of the day:", error);
-              setError(`Failed to fetch the verse of the day: ${error instanceof Error ? error.message : error}`);
-          }
-          finally {
               setLoading(false);
-          }
+          };
+          socket.onerror = (error) => {
+              console.error("WebSocket error:", error);
+              setError("WebSocket error occurred.");
+              setLoading(false);
+          };
+          socket.onclose = () => {
+              console.log("WebSocket connection closed");
+          };
       };
       React.useEffect(() => {
-          fetchVerseOfTheDay(); // Fetch VOTD when the component mounts
+          fetchVerseOfTheDay(); // Fetch VOTD via WebSocket when the component mounts
       }, [serverAPI]);
       return (window.SP_REACT.createElement("div", null,
           window.SP_REACT.createElement("h1", null, "Verse of the Day"),

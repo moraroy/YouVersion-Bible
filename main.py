@@ -15,16 +15,12 @@ add_plugin_to_path()
 
 import os
 import logging
-import re
 import asyncio
-import subprocess
-import shutil
-import requests
 import json
+import re
+import requests
 from aiohttp import web
-from decky_plugin import DECKY_PLUGIN_DIR, DECKY_USER_HOME
-from settings import SettingsManager
-from subprocess import Popen, run
+import decky_plugin
 
 class Plugin:
     async def _main(self):
@@ -62,11 +58,6 @@ class Plugin:
 
                     image_urls = re.findall(r'<a class="block[^>]*><img src="([^"]+)"', html_content)
                     image_array = [f"https://www.bible.com{src}" for src in image_urls]
-
-                    decky_plugin.logger.info(f"Verse: {verse}")
-                    decky_plugin.logger.info(f"Reference: {reference}")
-                    decky_plugin.logger.info(f"Version: {version}")
-                    decky_plugin.logger.info(f"Images: {image_array}")
 
                     return {
                         'citation': reference,
@@ -109,32 +100,39 @@ class Plugin:
             decky_plugin.logger.error("Failed to fetch the verse of the day.")
             return {}
 
-        # Define the route handler inside _main
-        async def handleVOTD(request):
+        # WebSocket handler to send VOTD data
+        async def handle_votd_ws(request):
+            ws = web.WebSocketResponse()
+            await ws.prepare(request)
+
             try:
+                # Fetch VOTD data and send it over WebSocket
                 votd_data = await fetch_votd()
                 if votd_data:
-                    return web.json_response(votd_data)
-                return web.json_response({"error": "Failed to fetch data"}, status=500)
+                    await ws.send_json(votd_data)
+                else:
+                    await ws.send_json({"error": "Failed to fetch data"})
             except Exception as e:
-                decky_plugin.logger.error(f"Error handling /votd request: {e}")
-                return web.json_response({"error": "Internal server error"}, status=500)
+                decky_plugin.logger.error(f"Error handling WebSocket: {e}")
+                await ws.send_json({"error": "Internal error"})
+            finally:
+                await ws.close()
 
-        # Set up the web application and routes inside _main
+        # Set up the web application
         app = web.Application()
-        app.router.add_get('/votd', handleVOTD)
+        app.router.add_get('/votd_ws', handle_votd_ws)
 
+        # Set up the web server
         runner = web.AppRunner(app)
         await runner.setup()
-        decky_plugin.logger.info("Server runner setup")
         site = web.TCPSite(runner, 'localhost', 8777)
         await site.start()
         decky_plugin.logger.info("Server started at http://localhost:8777")
 
-        # Keep the server running
+        # Keep the server running indefinitely
         await asyncio.Event().wait()
 
     async def _unload(self):
         decky_plugin.logger.info("Plugin Unloaded!")
-        # Clean up any resources, if necessary
+        # Perform any necessary cleanup
         pass

@@ -81,17 +81,17 @@
     return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 448 512"},"child":[{"tag":"path","attr":{"d":"M448 358.4V25.6c0-16-9.6-25.6-25.6-25.6H96C41.6 0 0 41.6 0 96v320c0 54.4 41.6 96 96 96h326.4c12.8 0 25.6-9.6 25.6-25.6v-16c0-6.4-3.2-12.8-9.6-19.2-3.2-16-3.2-60.8 0-73.6 6.4-3.2 9.6-9.6 9.6-19.2zM144 144c0-8.84 7.16-16 16-16h48V80c0-8.84 7.16-16 16-16h32c8.84 0 16 7.16 16 16v48h48c8.84 0 16 7.16 16 16v32c0 8.84-7.16 16-16 16h-48v112c0 8.84-7.16 16-16 16h-32c-8.84 0-16-7.16-16-16V192h-48c-8.84 0-16-7.16-16-16v-32zm236.8 304H96c-19.2 0-32-12.8-32-32s16-32 32-32h284.8v64z"}}]})(props);
   }
 
-  // Define the Content component
+  // Define the Content component for displaying Verse of the Day
   const Content = ({ serverAPI }) => {
       const [verseOfTheDay, setVerseOfTheDay] = React.useState(null);
       const [error, setError] = React.useState(null);
       const [loading, setLoading] = React.useState(true);
-      // Function to fetch Verse of the Day and handle errors
+      // Fetch Verse of the Day from the backend
       const fetchVerseOfTheDay = async () => {
           try {
               setLoading(true);
               console.log("Fetching Verse of the Day...");
-              // Fetch the Verse of the Day from the backend (main.py server)
+              // Fetch the Verse of the Day from the backend (assuming it's served at http://localhost:8777/votd)
               const response = await fetch("http://localhost:8777/votd");
               if (!response.ok) {
                   throw new Error(`Error: ${response.statusText}`);
@@ -124,7 +124,7 @@
           }
       };
       React.useEffect(() => {
-          fetchVerseOfTheDay();
+          fetchVerseOfTheDay(); // Fetch VOTD when the component mounts
       }, [serverAPI]);
       return (window.SP_REACT.createElement("div", null,
           window.SP_REACT.createElement("h1", null, "Verse of the Day"),
@@ -143,6 +143,7 @@
                   window.SP_REACT.createElement("h3", null, "Images:"),
                   window.SP_REACT.createElement("div", { style: { display: 'flex', flexDirection: 'column' } }, verseOfTheDay.images.map((image, index) => (window.SP_REACT.createElement("img", { key: index, src: image, alt: `Image ${index + 1}`, style: { maxWidth: '100%', marginBottom: '10px' } }))))))))));
   };
+  // Define the Decky plugin to render the content
   var index = deckyFrontendLib.definePlugin((serverAPI) => {
       return {
           title: window.SP_REACT.createElement("div", { className: deckyFrontendLib.staticClasses.Title }, "YouVersion"),

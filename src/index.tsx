@@ -1,12 +1,8 @@
-import {
-  definePlugin,
-  ServerAPI,
-  staticClasses,
-} from "decky-frontend-lib";
+import { definePlugin, ServerAPI, staticClasses } from "decky-frontend-lib";
 import { useEffect, useState, VFC } from "react";
 import { FaBible } from "react-icons/fa";
 
-// Define the Content component
+// Define the Content component for displaying Verse of the Day
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   const [verseOfTheDay, setVerseOfTheDay] = useState<{
     citation: string;
@@ -17,13 +13,13 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Function to fetch Verse of the Day and handle errors
+  // Fetch Verse of the Day from the backend
   const fetchVerseOfTheDay = async (): Promise<void> => {
     try {
       setLoading(true);
       console.log("Fetching Verse of the Day...");
 
-      // Fetch the Verse of the Day from the backend (main.py server)
+      // Fetch the Verse of the Day from the backend (assuming it's served at http://localhost:8777/votd)
       const response = await fetch("http://localhost:8777/votd");
 
       if (!response.ok) {
@@ -59,7 +55,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   };
 
   useEffect(() => {
-    fetchVerseOfTheDay();
+    fetchVerseOfTheDay(); // Fetch VOTD when the component mounts
   }, [serverAPI]);
 
   return (
@@ -97,6 +93,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   );
 };
 
+// Define the Decky plugin to render the content
 export default definePlugin((serverAPI: ServerAPI) => {
   return {
     title: <div className={staticClasses.Title}>YouVersion</div>,

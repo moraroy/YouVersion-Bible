@@ -1,24 +1,36 @@
-import { definePlugin, ServerAPI, staticClasses } from "decky-frontend-lib";
-import { useEffect, useState, VFC } from "react";
+import { definePlugin, ServerAPI, staticClasses, Focusable } from "decky-frontend-lib";
+import { useEffect, useState, VFC, useRef } from "react";
 import { FaBible } from "react-icons/fa";
+import booksData from './books.json'; 
+import versesData from './verses.json';
 
-// Define the Content component for displaying Verse of the Day
+// Define the Content component for displaying Verse of the Day and Book/Chapter selection
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
+  const [books] = useState(booksData.books);  // Loaded from books.json
+  const [selectedBook, setSelectedBook] = useState<string | null>(null);
+  const [chapters, setChapters] = useState<number[]>([]);
+  const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
+  const [verses, setVerses] = useState<string[]>([]);
+  const [selectedVerse, setSelectedVerse] = useState<string | null>(null);
+  const [verseText, setVerseText] = useState<string>("");
+
   const [verseOfTheDay, setVerseOfTheDay] = useState<{
     citation: string;
     passage: string;
     images: string[];
     version: string;
   } | null>(null);
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const scrollToTopRef = useRef<HTMLDivElement>(null);  // Scroll to top reference
 
   // Function to handle WebSocket connection and receive VOTD data
   const fetchVerseOfTheDay = (): void => {
     setLoading(true);
     console.log("Connecting to WebSocket for Verse of the Day...");
 
-    // Connect to the WebSocket server
     const socket = new WebSocket("ws://localhost:8777/votd_ws");
 
     socket.onopen = () => {
@@ -32,7 +44,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
       if (data.error) {
         setError(data.error);
       } else {
-        // Set the verse data in state
         const { citation, passage, images, version } = data;
         setVerseOfTheDay({
           citation: citation.toString(),
@@ -56,13 +67,43 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   };
 
   useEffect(() => {
-    fetchVerseOfTheDay(); // Fetch VOTD via WebSocket when the component mounts
+    fetchVerseOfTheDay();  // Fetch VOTD via WebSocket when component mounts
   }, [serverAPI]);
 
-  return (
-    <div>
-      <h1>Verse of the Day</h1>
+  // Update available chapters for the selected book
+  useEffect(() => {
+    if (selectedBook) {
+      const bookData = books.find(book => book.book === selectedBook);
+      if (bookData) {
+        setChapters(Array.from({ length: bookData.chapters }, (_, i) => i + 1));
+      }
+    }
+  }, [selectedBook]);
 
+  // Fetch all verses for the selected chapter
+  useEffect(() => {
+    if (selectedBook && selectedChapter) {
+      const chapterVerses = Object.keys(versesData)
+        .filter(key => key.startsWith(`${selectedBook} ${selectedChapter}:`))
+        .map(key => key.split(':')[1]);  // Extract verse number
+
+      setVerses(chapterVerses);  // Set verses for the selected chapter
+    }
+  }, [selectedBook, selectedChapter]);
+
+  // Fetch individual verse content when selected
+  useEffect(() => {
+    if (selectedBook && selectedChapter && selectedVerse) {
+      const verseKey = `${selectedBook} ${selectedChapter}:${selectedVerse}`;
+      const verseContent = versesData[verseKey];
+
+      setVerseText(verseContent || "Verse not found.");
+    }
+  }, [selectedBook, selectedChapter, selectedVerse]);
+
+  return (
+    <div ref={scrollToTopRef} style={{ padding: '20px' }}>
+      {/* Verse of the Day Section */}
       {loading && <p>Loading verse of the day...</p>}
 
       {error && !loading && (
@@ -88,6 +129,62 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Book Selection */}
+      <div>
+        <h1>Select a Book</h1>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
+          {books.map(book => (
+            <Focusable key={book.book} onActivate={() => { setSelectedBook(book.book); setChapters([]); }}>
+              <button style={{ padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '5px' }}>
+                {book.book}
+              </button>
+            </Focusable>
+          ))}
+        </div>
+      </div>
+
+      {/* Chapter Selection */}
+      {selectedBook && (
+        <div>
+          <h2>Select a Chapter for {selectedBook}</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
+            {chapters.map(chapter => (
+              <Focusable key={chapter} onActivate={() => { setSelectedChapter(chapter); setVerses([]); }}>
+                <button style={{ padding: '10px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '5px' }}>
+                  Chapter {chapter}
+                </button>
+              </Focusable>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Verse Selection */}
+      {selectedBook && selectedChapter && verses.length > 0 && (
+        <div>
+          <h2>Verses for {selectedBook} Chapter {selectedChapter}</h2>
+          <div>
+            {verses.map((verse, index) => (
+              <div key={index}>
+                <Focusable onActivate={() => { setSelectedVerse(verse); }}>
+                  <button style={{ padding: '10px', background: '#6f42c1', color: '#fff', border: 'none', borderRadius: '5px' }}>
+                    Verse {verse}
+                  </button>
+                </Focusable>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Selected Verse Content */}
+      {selectedVerse && (
+        <div>
+          <h3>{`${selectedBook} ${selectedChapter}:${selectedVerse}`}</h3>
+          <p>{verseText}</p>
         </div>
       )}
     </div>

@@ -23,6 +23,8 @@ from aiohttp import web
 import decky_plugin
 
 class Plugin:
+    votd_cache = {}  # Use a class-level variable to store cached data
+
     async def _main(self):
         decky_plugin.logger.info("This is _main being called")
 
@@ -44,6 +46,12 @@ class Plugin:
 
         # Define the fetch_votd function to process the fetched data
         async def fetch_votd():
+            # Check if we already have VOTD data in cache
+            if Plugin.votd_cache:
+                decky_plugin.logger.info("Returning cached VOTD data.")
+                return Plugin.votd_cache
+
+            # If cache is empty, fetch the data
             data = await fetch_data()
             if data:
                 html_content = data
@@ -59,12 +67,16 @@ class Plugin:
                     image_urls = re.findall(r'<a class="block[^>]*><img src="([^"]+)"', html_content)
                     image_array = [f"https://www.bible.com{src}" for src in image_urls]
 
-                    return {
+                    # Cache the fetched data inside the Plugin class
+                    Plugin.votd_cache = {
                         'citation': reference,
                         'passage': verse,
                         'images': image_array,
                         'version': version
                     }
+
+                    decky_plugin.logger.info("Fetched and cached new Verse of the Day")
+                    return Plugin.votd_cache
                 else:
                     decky_plugin.logger.warning("Using the old way to extract data.")
                     verses_array = []
@@ -90,12 +102,15 @@ class Plugin:
                     image_array = [f"https://www.bible.com{src}" for src in images_matches]
                     decky_plugin.logger.info(f"Images: {image_array}")
 
-                    return {
+                    # Cache the data even when fetched with the old way
+                    Plugin.votd_cache = {
                         'citation': citations_array[0] if citations_array else '',
                         'passage': verses_array[0] if verses_array else '',
                         'images': image_array,
                         'version': version
                     }
+
+                    return Plugin.votd_cache
 
             decky_plugin.logger.error("Failed to fetch the verse of the day.")
             return {}

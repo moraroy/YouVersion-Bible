@@ -20,97 +20,124 @@ def add_plugin_to_path():
 # Call this to ensure Decky can find the plugin
 add_plugin_to_path()
 
+import requests
+import json
+import re
+
 class Plugin:
-    scan_lock = asyncio.Lock()
-
-    async def fetch_verse_of_the_day(self):
-        """
-        Fetches the verse of the day from the external API.
-        """
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get("https://api.bible.com/v1/verse_of_the_day") as response:
-                    if response.status == 200:
-                        verse_data = await response.json()
-                        decky_plugin.logger.debug(f"Fetched verse data: {verse_data}")
-                        return {
-                            "citation": verse_data.get("citation"),
-                            "passage": verse_data.get("passage"),
-                            "version": verse_data.get("version"),
-                            "images": verse_data.get("images", [])
-                        }
-                    else:
-                        decky_plugin.logger.error(f"Failed to fetch verse data: {response.status}")
-                        return None
-        except Exception as e:
-            decky_plugin.logger.error(f"Error fetching verse data: {e}")
-            return None
-
-    async def handle_verse_of_the_day(self, request):
-        """
-        Handles the API endpoint `/api/verse-of-the-day` by fetching the verse data.
-        """
-        # Log incoming request method, path, and headers
-        decky_plugin.logger.info(f"Received request: {request.method} {request.path}")
-        decky_plugin.logger.debug(f"Request headers: {request.headers}")
-
-        verse_data = await self.fetch_verse_of_the_day()
-        if verse_data:
-            # Log the fetched verse data before sending it
-            decky_plugin.logger.info(f"Sending verse data: {verse_data}")
-            return web.json_response(verse_data)
-        else:
-            # Log error and failure to fetch verse data
-            decky_plugin.logger.error("Failed to fetch verse data, sending error response")
-            return web.json_response({"status": "error", "message": "Failed to fetch verse data"}, status=500)
-
-    async def log_middleware(self, app, handler):
-        """
-        Logs incoming requests and outgoing responses.
-        """
-        async def middleware_handler(request):
-            # Log incoming request details
-            decky_plugin.logger.info(f"Incoming request: {request.method} {request.path}")
-            decky_plugin.logger.debug(f"Request headers: {request.headers}")
-
-            if request.can_read_body:
-                body = await request.read()
-                decky_plugin.logger.debug(f"Request body: {body.decode('utf-8') if body else ''}")
-
-            try:
-                response = await handler(request)
-                # Log outgoing response details
-                decky_plugin.logger.info(f"Response status: {response.status}")
-                decky_plugin.logger.debug(f"Response headers: {response.headers}")
-
-                # If the response is JSON, log the response body as well
-                if response.content_type == 'application/json':
-                    response_body = await response.text()
-                    decky_plugin.logger.debug(f"Response body: {response_body}")
-
-                return response
-            except Exception as e:
-                decky_plugin.logger.error(f"Exception occurred: {e}")
-                raise
-        return middleware_handler
 
     async def _main(self):
-        """
-        Starts the server and sets up the API routes.
-        This method is automatically invoked by the Decky framework.
-        """
-        app = web.Application(middlewares=[self.log_middleware])
+        decky_plugin.logger.info("This is _main being called")
+        
+        async def handleVOTD(request):
+            language = request.rel_url.query.get('lang', 'en')
+            votd_data = await asyncio.to_thread(self.get_votd, language)
+            return web.json_response(votd_data)
 
-        # Register route for fetching verse of the day, binding it to the current instance
-        app.router.add_get('/api/verse-of-the-day', partial(self.handle_verse_of_the_day))
-
-        # Start the server
+        app = web.Application()
+        app.router.add_get('/votd', handleVOTD)
         runner = web.AppRunner(app)
         await runner.setup()
         decky_plugin.logger.info("Server runner setup")
         site = web.TCPSite(runner, 'localhost', 8777)
         await site.start()
         decky_plugin.logger.info("Server started at http://localhost:8777")
+
+    def fetch_data(self, language):
+        URL = f"https://www.bible.com/{language}/verse-of-the-day"
+        print(f"Fetching data for URL: {URL}")  # Log the URL being fetched
+        try:
+            response = requests.get(URL)
+            response.raise_for_status()
+            print(f"Successfully fetched data for language: {language}")
+            return response
+        except requests.exceptions.HTTPError as errh:
+            print(f"HTTP Error for language '{language}': {errh.response.status_code}")
+        except requests.exceptions.ConnectionError as errc:
+            print(f"Error Connecting for language '{language}': {errc}")
+        except requests.exceptions.Timeout as errt:
+            print(f"Timeout Error for language '{language}': {errt}")
+        except requests.exceptions.RequestException as err:
+            print(f"Network error for language '{language}': {err}")
+        return None
+
+    def get_votd(self, lang):
+        language_list = lang.split(',')
+        index = 0
+        response_status = 0
+        data = None
+
+        while index < len(language_list) and response_status != 200:
+            language = language_list[index].strip()
+            print(f"Trying language: {language}")  # Log the current language being tried
+            data = self.fetch_data(language)
+            if data:
+                response_status = data.status_code
+                print(f"Response status: {response_status}")  # Log the response status
+                if response_status == 200:
+                    html_content = data.text
+
+                    # Look for the __NEXT_DATA__ script tag
+                    next_data_match = re.search(r'<script id="__NEXT_DATA__" type="application/json">(.+?)</script>', html_content, re.S)
+                    if next_data_match:
+                        json_data = next_data_match.group(1)
+                        json_obj = json.loads(json_data)
+                        verse = json_obj['props']['pageProps']['verses'][0]['content'].replace('\n', ' ')
+                        reference = json_obj['props']['pageProps']['verses'][0]['reference']['human']
+                        version = json_obj['props']['pageProps']['versionData']['abbreviation']
+
+                        # Extract image URLs
+                        image_urls = re.findall(r'<a class="block[^>]*><img src="([^"]+)"', html_content)
+                        image_array = [f"https://www.bible.com{src}" for src in image_urls]
+
+                        print(f"Verse: {verse}")  # Log the verse
+                        print(f"Reference: {reference}")  # Log the reference
+                        print(f"Version: {version}")  # Log the version
+                        print(f"Images: {image_array}")  # Log the images
+
+                        return {
+                            'citation': reference,
+                            'passage': verse,
+                            'images': image_array,
+                            'version': version
+                        }
+                    else:
+                        print("Using the old way...")  # Log that the script is using the old way
+                        # Old way
+                        verses_array = []
+                        citations_array = []
+                        image_array = []
+
+                        # Extract verses and citations
+                        verses_matches = re.findall(r'<a class="text-text-light w-full no-underline"[^>]*>(.+?)</a>', html_content, re.S)
+                        citations_matches = re.findall(r'<p class="text-gray-25">(.+?)</p>', html_content, re.S)
+                        images_matches = re.findall(r'<a class="block[^>]*><img src="([^"]+)"', html_content)
+
+                        for citation in citations_matches:
+                            # Extract citation and version
+                            citation_text = citation.strip()
+                            version = citation_text[-4:].replace('(', '').replace(')', '')
+                            citation_text = citation_text[:-6]
+                            citations_array.append(citation_text)
+                            print(f"Citation: {citation_text}")  # Log the citation
+
+                        for verse in verses_matches:
+                            unformatted_verse = re.sub(r'\n', ' ', verse.strip())
+                            verses_array.append(unformatted_verse)
+                            print(f"Verse: {unformatted_verse}")  # Log the verse
+
+                        image_array = [f"https://www.bible.com{src}" for src in images_matches]
+                        print(f"Images: {image_array}")  # Log the images
+
+                        return {
+                            'citation': citations_array[0] if citations_array else '',
+                            'passage': verses_array[0] if verses_array else '',
+                            'images': image_array,
+                            'version': version
+                        }
+            index += 1
+        print("Failed to fetch the verse of the day.")  # Log failure
+        return {}
 
     async def _unload(self):
         """

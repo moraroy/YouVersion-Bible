@@ -84,84 +84,52 @@
   // Define the Content component
   const Content = ({ serverAPI }) => {
       const [verseOfTheDay, setVerseOfTheDay] = React.useState(null);
-      const [error, setError] = React.useState(null); // To capture and display errors
-      const [loading, setLoading] = React.useState(true); // To show a loading state
-      // Function to log Verse of the Day to console and handle errors
-      const logVerseOfTheDay = async () => {
-          if (!serverAPI) {
-              const errMsg = "serverAPI is not defined";
-              console.error(errMsg); // Log the error
-              setError(errMsg); // Show the error to the user
-              setLoading(false);
-              return;
-          }
+      const [error, setError] = React.useState(null);
+      const [loading, setLoading] = React.useState(true);
+      // Function to fetch Verse of the Day and handle errors
+      const fetchVerseOfTheDay = async () => {
           try {
-              setLoading(true); // Start loading
+              setLoading(true);
               console.log("Fetching Verse of the Day...");
               // Fetch the Verse of the Day from the backend (main.py server)
-              const response = await fetch("http://localhost:8777/api/verse-of-the-day");
-              console.log("Response status:", response.status);
-              console.log("Response headers:", response.headers);
+              const response = await fetch("http://localhost:8777/votd");
               if (!response.ok) {
-                  const fetchError = `Error: ${response.statusText}`;
-                  console.error(fetchError); // Log the fetch error
-                  setError(fetchError); // Show the error to the user
-                  setLoading(false);
-                  return;
+                  throw new Error(`Error: ${response.statusText}`);
               }
               const data = await response.json();
-              // Log the full response to understand its structure
-              console.log("Full Verse of the Day Response:", JSON.stringify(data, null, 2));
               // Check if we received the expected response
               if (!data) {
-                  const noDataMsg = "No data received from the API.";
-                  console.error(noDataMsg); // Log the error
-                  setError(noDataMsg); // Show the error to the user
-                  setLoading(false);
-                  return;
+                  throw new Error("No data received from the API.");
               }
               // Destructure the response to get citation, passage, images, and version
               const { citation, passage, images, version } = data;
-              // Log the checks
-              console.log("Checking structure of the response...");
-              console.log("Citation: ", citation);
-              console.log("Passage: ", passage);
-              console.log("Version: ", version);
-              console.log("Images: ", images);
               if (citation && passage) {
-                  console.log("Verse of the Day: Valid structure");
                   setVerseOfTheDay({
                       citation: citation.toString(),
                       passage: passage.toString(),
                       images: images ?? [],
-                      version: version ?? "Unknown", // Default version if not found
+                      version: version ?? "Unknown",
                   });
               }
               else {
-                  const invalidStructureMsg = `Invalid structure: Missing fields. Citation: ${citation}, Passage: ${passage}`;
-                  console.error(invalidStructureMsg); // Log the error
-                  setError(invalidStructureMsg); // Show the error to the user
+                  throw new Error(`Invalid structure: Missing fields. Citation: ${citation}, Passage: ${passage}`);
               }
           }
           catch (error) {
-              console.error("Failed to fetch the verse of the day:", error); // Log the error
-              setError(`Failed to fetch the verse of the day: ${error instanceof Error ? error.message : error}`); // Show the error to the user
+              console.error("Failed to fetch the verse of the day:", error);
+              setError(`Failed to fetch the verse of the day: ${error instanceof Error ? error.message : error}`);
           }
           finally {
-              setLoading(false); // Stop loading after the request completes
+              setLoading(false);
           }
       };
-      // Call logVerseOfTheDay when the component is mounted
       React.useEffect(() => {
-          console.log("Component mounted. Calling logVerseOfTheDay...");
-          logVerseOfTheDay();
-      }, [serverAPI]); // Ensure the effect runs when serverAPI is available
+          fetchVerseOfTheDay();
+      }, [serverAPI]);
       return (window.SP_REACT.createElement("div", null,
           window.SP_REACT.createElement("h1", null, "Verse of the Day"),
           loading && window.SP_REACT.createElement("p", null, "Loading verse of the day..."),
-          " ",
-          error && !loading && ( // Error display
-          window.SP_REACT.createElement("div", { style: { color: 'red', border: '1px solid red', padding: '10px', marginBottom: '10px' } },
+          error && !loading && (window.SP_REACT.createElement("div", { style: { color: 'red', border: '1px solid red', padding: '10px', marginBottom: '10px' } },
               window.SP_REACT.createElement("h2", null, "Error:"),
               window.SP_REACT.createElement("p", null, error))),
           verseOfTheDay && !loading && (window.SP_REACT.createElement("div", null,
@@ -176,7 +144,6 @@
                   window.SP_REACT.createElement("div", { style: { display: 'flex', flexDirection: 'column' } }, verseOfTheDay.images.map((image, index) => (window.SP_REACT.createElement("img", { key: index, src: image, alt: `Image ${index + 1}`, style: { maxWidth: '100%', marginBottom: '10px' } }))))))))));
   };
   var index = deckyFrontendLib.definePlugin((serverAPI) => {
-      console.log("Defining plugin...");
       return {
           title: window.SP_REACT.createElement("div", { className: deckyFrontendLib.staticClasses.Title }, "YouVersion"),
           content: window.SP_REACT.createElement(Content, { serverAPI: serverAPI }),

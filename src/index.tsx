@@ -30,21 +30,30 @@ const Content = () => {
 
   return (
     <div style={{ padding: '20px' }}>
-      {/* Purple Verse Buttons Above the "Verse of the Day" Card */}
+      {/* Page 2 - Display Verse of the Day at the top */}
       {page === 2 && selectedBook && selectedChapter && (
         <>
-          <div style={{ marginBottom: '20px' }}>
-            <h2>Select a Verse</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px' }}>
-              {Array.from({ length: 10 }, (_, index) => {
-                const verseKey = `${selectedBook} ${selectedChapter}:${index + 1}`;
-                return (
+          <div style={{ marginBottom: '20px', background: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>
+            <h2>Verse of the Day</h2>
+            <p><strong>{verseOfTheDay?.citation}</strong></p>
+            <p>{verseOfTheDay?.passage}</p>
+            <button onClick={() => readVerseAloud(`${verseOfTheDay?.citation}: ${verseOfTheDay?.passage}`)} style={{ marginTop: '10px', background: '#28a745', color: '#fff', padding: '10px 15px', borderRadius: '5px', border: 'none' }}>
+              Read Aloud
+            </button>
+          </div>
+
+          {/* Display Verses for the selected chapter */}
+          <h1>{selectedBook} Chapter {selectedChapter}</h1>
+          <div>
+            {Array.from({ length: books.books.find(book => book.book === selectedBook)?.chapters || 0 }, (_, index) => {
+              const verseKey = `${selectedBook} ${selectedChapter}:${index + 1}`;
+              return (
+                <div key={verseKey} style={{ marginBottom: '10px' }}>
                   <button
-                    key={verseKey}
                     onClick={() => setSelectedVerse(verseKey)}
                     style={{
                       padding: '10px',
-                      background: '#6f42c1', // Purple color
+                      background: '#6f42c1',
                       color: '#fff',
                       border: 'none',
                       borderRadius: '5px',
@@ -55,23 +64,14 @@ const Content = () => {
                   >
                     Verse {index + 1}
                   </button>
-                );
-              })}
-            </div>
+                  <p>
+                    <sup style={{ color: '#6f42c1', fontSize: '14px' }}>{index + 1}</sup> {verses[verseKey]}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </>
-      )}
-
-      {/* Verse of the Day Section */}
-      {verseOfTheDay && (
-        <div style={{ marginBottom: '20px', background: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>
-          <h2>Verse of the Day</h2>
-          <p><strong>{verseOfTheDay.citation}</strong></p>
-          <p>{verseOfTheDay.passage}</p>
-          <button onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)} style={{ marginTop: '10px', background: '#28a745', color: '#fff', padding: '10px 15px', borderRadius: '5px', border: 'none' }}>
-            Read Aloud
-          </button>
-        </div>
       )}
 
       {/* Page 0 - Select Book */}
@@ -112,53 +112,18 @@ const Content = () => {
                 onClick={() => { setSelectedChapter(index + 1); setPage(2); }}
                 style={{
                   padding: '10px',
-                  background: '#28a745', // Green color
+                  background: '#28a745',
                   color: '#fff',
                   border: 'none',
                   borderRadius: '5px',
                   cursor: 'pointer',
                   transition: 'background 0.3s ease',
-                  backgroundColor: selectedChapter === index + 1 ? '#28a745' : '#28a745', // Keep the green color
+                  backgroundColor: selectedChapter === index + 1 ? '#28a745' : '#28a745',
                 }}
               >
                 Chapter {index + 1}
               </button>
             ))}
-          </div>
-        </>
-      )}
-
-      {/* Page 2 - Display Verses with Superscript Numbers */}
-      {page === 2 && selectedBook && selectedChapter && (
-        <>
-          <h1>{selectedBook} Chapter {selectedChapter}</h1>
-          <div>
-            {Array.from({ length: 10 }, (_, index) => {
-              const verseKey = `${selectedBook} ${selectedChapter}:${index + 1}`;
-              return (
-                <div key={verseKey} style={{ marginBottom: '10px' }}>
-                  <button
-                    onClick={() => setSelectedVerse(verseKey)}
-                    style={{
-                      padding: '10px',
-                      background: '#6f42c1', // Purple color
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '5px',
-                      cursor: 'pointer',
-                      transition: 'background 0.3s ease',
-                      backgroundColor: selectedVerse === verseKey ? '#28a745' : '#6f42c1',
-                    }}
-                  >
-                    Verse {index + 1}
-                  </button>
-                  <p>
-                    {/* Display verse with superscript numbering */}
-                    <sup style={{ color: '#6f42c1', fontSize: '14px' }}>{index + 1}</sup> {verses[verseKey]}
-                  </p>
-                </div>
-              );
-            })}
           </div>
         </>
       )}

@@ -107,18 +107,18 @@ const Content = () => {
         </>
       )}
 
-      {/* Page 2 - Display Purple Verse Buttons Above the Verses */}
+      {/* Page 2 - Display Purple Verse Buttons */}
       {page === 2 && selectedBook && selectedChapter && (
         <>
           <div style={{ marginBottom: '20px' }}>
             <h2>Select a Verse</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px' }}>
-              {Array.from({ length: 10 }, (_, index) => {
-                const verseKey = `${selectedBook} ${selectedChapter}:${index + 1}`;
-                return (
+              {Object.keys(verses)
+                .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`)) // Filter verses of the selected chapter
+                .map((verseKey) => (
                   <button
                     key={verseKey}
-                    onClick={() => scrollToVerse(verseKey)} // Scroll to verse
+                    onClick={() => scrollToVerse(verseKey)} // Scroll to the selected verse
                     style={{
                       padding: '10px',
                       background: '#6f42c1', // Purple color
@@ -130,10 +130,9 @@ const Content = () => {
                       backgroundColor: selectedVerse === verseKey ? '#28a745' : '#6f42c1',
                     }}
                   >
-                    Verse {index + 1}
+                    {verseKey.split(':')[1]} {/* Display the verse number */}
                   </button>
-                );
-              })}
+                ))}
             </div>
           </div>
         </>
@@ -144,17 +143,16 @@ const Content = () => {
         <>
           <h1>{selectedBook} Chapter {selectedChapter}</h1>
           <div>
-            {Array.from({ length: 10 }, (_, index) => {
-              const verseKey = `${selectedBook} ${selectedChapter}:${index + 1}`;
-              return (
+            {Object.keys(verses)
+              .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`)) // Filter verses of the selected chapter
+              .map((verseKey) => (
                 <div key={verseKey} style={{ marginBottom: '10px' }} ref={(el) => verseRefs.current[verseKey] = el}>
                   <p>
                     {/* Display verse with superscript numbering */}
-                    <sup style={{ color: '#6f42c1', fontSize: '14px' }}>{index + 1}</sup> {verses[verseKey]}
+                    <sup style={{ color: '#6f42c1', fontSize: '14px' }}>{verseKey.split(':')[1]}</sup> {verses[verseKey]}
                   </p>
                 </div>
-              );
-            })}
+              ))}
           </div>
         </>
       )}

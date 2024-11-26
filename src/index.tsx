@@ -12,6 +12,7 @@ const Content = () => {
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
   const [selectedVerse, setSelectedVerse] = useState<string | null>(null);
+  const [focusedBookIndex, setFocusedBookIndex] = useState<number | null>(null); // To manage keyboard navigation
 
   // Create a ref object for each verse
   const verseRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -39,8 +40,23 @@ const Content = () => {
     setSelectedVerse(verseKey); // Update the selected verse state
   };
 
+  // Handle keyboard navigation for book selection
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (page === 0 && books.books.length > 0) {
+      if (event.key === 'ArrowDown') {
+        setFocusedBookIndex((prevIndex) => (prevIndex === null || prevIndex === books.books.length - 1 ? 0 : prevIndex + 1));
+      } else if (event.key === 'ArrowUp') {
+        setFocusedBookIndex((prevIndex) => (prevIndex === null || prevIndex === 0 ? books.books.length - 1 : prevIndex - 1));
+      } else if (event.key === 'Enter' && focusedBookIndex !== null) {
+        const book = books.books[focusedBookIndex];
+        setSelectedBook(book.book);
+        setPage(1);
+      }
+    }
+  };
+
   return (
-    <div style={{ padding: '20px' }}>
+    <div style={{ padding: '20px' }} onKeyDown={handleKeyDown} tabIndex={0}>
       {/* Verse of the Day Section - Only on Page 0 */}
       {page === 0 && verseOfTheDay && (
         <div style={{ marginBottom: '20px', background: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>
@@ -58,10 +74,11 @@ const Content = () => {
         <>
           <h1>Select a Book</h1>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
-            {books.books.map((book) => (
+            {books.books.map((book, index) => (
               <button
                 key={book.book}
                 onClick={() => { setSelectedBook(book.book); setPage(1); }}
+                onFocus={() => setFocusedBookIndex(index)} // Update the focused book index on focus
                 style={{
                   padding: '10px',
                   background: '#007bff',
@@ -71,6 +88,7 @@ const Content = () => {
                   cursor: 'pointer',
                   transition: 'background 0.3s ease',
                   backgroundColor: selectedBook === book.book ? '#28a745' : '#007bff',
+                  outline: focusedBookIndex === index ? '3px solid #ffeb3b' : 'none', // Highlight focused button
                 }}
               >
                 {book.book}

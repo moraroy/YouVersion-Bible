@@ -107,6 +107,38 @@ const Content = () => {
         </>
       )}
 
+      {/* Page 2 - Display Purple Verse Buttons Above the Verses */}
+      {page === 2 && selectedBook && selectedChapter && (
+        <>
+          <div style={{ marginBottom: '20px' }}>
+            <h2>Select a Verse</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px' }}>
+              {Array.from({ length: 10 }, (_, index) => {
+                const verseKey = `${selectedBook} ${selectedChapter}:${index + 1}`;
+                return (
+                  <button
+                    key={verseKey}
+                    onClick={() => scrollToVerse(verseKey)} // Scroll to verse
+                    style={{
+                      padding: '10px',
+                      background: '#6f42c1', // Purple color
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '5px',
+                      cursor: 'pointer',
+                      transition: 'background 0.3s ease',
+                      backgroundColor: selectedVerse === verseKey ? '#28a745' : '#6f42c1',
+                    }}
+                  >
+                    Verse {index + 1}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+
       {/* Page 2 - Display Verses with Superscript Numbers */}
       {page === 2 && selectedBook && selectedChapter && (
         <>
@@ -125,36 +157,6 @@ const Content = () => {
             })}
           </div>
         </>
-      )}
-
-      {/* Purple Verse Buttons Below the "Verse of the Day" Card */}
-      {page === 2 && selectedBook && selectedChapter && (
-        <div style={{ marginTop: '20px' }}>
-          <h2>Select a Verse</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px' }}>
-            {Array.from({ length: 10 }, (_, index) => {
-              const verseKey = `${selectedBook} ${selectedChapter}:${index + 1}`;
-              return (
-                <button
-                  key={verseKey}
-                  onClick={() => scrollToVerse(verseKey)} // Scroll to verse
-                  style={{
-                    padding: '10px',
-                    background: '#6f42c1', // Purple color
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    transition: 'background 0.3s ease',
-                    backgroundColor: selectedVerse === verseKey ? '#28a745' : '#6f42c1',
-                  }}
-                >
-                  Verse {index + 1}
-                </button>
-              );
-            })}
-          </div>
-        </div>
       )}
 
       {/* Pagination Controls */}

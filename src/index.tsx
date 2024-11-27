@@ -1,4 +1,4 @@
-import { definePlugin } from "decky-frontend-lib";
+import { definePlugin, ButtonItem } from "decky-frontend-lib";  // Import ButtonItem from decky-frontend-lib
 import { useState, useRef } from "react";
 import { FaBible } from "react-icons/fa";
 import { useVOTD } from './getVOTD';  // Import the custom hook
@@ -75,24 +75,49 @@ const Content = () => {
           <h1>Select a Book</h1>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
             {books.books.map((book, index) => (
-              <button
-                key={book.book}
-                onClick={() => { setSelectedBook(book.book); setPage(1); }}
-                onFocus={() => setFocusedBookIndex(index)} // Update the focused book index on focus
-                style={{
-                  padding: '10px',
-                  background: '#007bff',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  transition: 'background 0.3s ease',
-                  backgroundColor: selectedBook === book.book ? '#28a745' : '#007bff',
-                  outline: focusedBookIndex === index ? '3px solid #ffeb3b' : 'none', // Highlight focused button
-                }}
-              >
-                {book.book}
-              </button>
+              <div key={book.book} style={{ position: 'relative' }}>
+                {/* Book Button */}
+                <button
+                  onClick={() => { setSelectedBook(book.book); setPage(1); }}
+                  onFocus={() => setFocusedBookIndex(index)} // Update the focused book index on focus
+                  style={{
+                    padding: '10px',
+                    background: '#007bff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    transition: 'background 0.3s ease',
+                    backgroundColor: selectedBook === book.book ? '#28a745' : '#007bff',
+                    outline: focusedBookIndex === index ? '3px solid #ffeb3b' : 'none', // Highlight focused button
+                  }}
+                >
+                  {book.book}
+                </button>
+
+                {/* ButtonItem component wrapped in a div for styling */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    width: '100%',
+                    padding: '10px',
+                    background: '#007bff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    opacity: 0, // Make it invisible but still clickable
+                  }}
+                >
+                  <ButtonItem
+                    onClick={() => { setSelectedBook(book.book); setPage(1); }}
+                  >
+                    Select {book.book}
+                  </ButtonItem>
+                </div>
+              </div>
             ))}
           </div>
         </>
@@ -162,11 +187,10 @@ const Content = () => {
           <h1>{selectedBook} Chapter {selectedChapter}</h1>
           <div>
             {Object.keys(verses)
-              .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`)) // Filter verses of the selected chapter
+              .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`))
               .map((verseKey) => (
                 <div key={verseKey} style={{ marginBottom: '10px' }} ref={(el) => verseRefs.current[verseKey] = el}>
                   <p>
-                    {/* Display verse with superscript numbering */}
                     <sup style={{ color: '#6f42c1', fontSize: '14px' }}>{verseKey.split(':')[1]}</sup> {verses[verseKey]}
                   </p>
                 </div>

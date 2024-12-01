@@ -77,37 +77,16 @@ const Content = () => {
             {books.books.map((book, index) => (
               <div key={book.book} style={{ position: 'relative' }}>
                 {/* Book Button */}
-                <button
-                  onClick={() => { setSelectedBook(book.book); setPage(1); }}
-                  onFocus={() => setFocusedBookIndex(index)} // Update the focused book index on focus
-                  style={{
-                    padding: '10px',
-                    background: '#007bff',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    transition: 'background 0.3s ease',
-                    backgroundColor: selectedBook === book.book ? '#28a745' : '#007bff',
-                    outline: focusedBookIndex === index ? '3px solid #ffeb3b' : 'none', // Highlight focused button
-                  }}
-                >
-                  {book.book}
-                </button>
-
-                {/* ButtonItem component wrapped in a div (for styling) */}
                 <div
+                  onFocus={() => setFocusedBookIndex(index)} // Update focused book index on focus
                   style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    width: '100%',
+                    outline: focusedBookIndex === index ? '3px solid #ffeb3b' : 'none', // Highlight focused button
                   }}
                 >
                   <ButtonItem
                     onClick={() => { setSelectedBook(book.book); setPage(1); }}
                   >
-                    Select {book.book}
+                    {book.book}
                   </ButtonItem>
                 </div>
               </div>
@@ -122,22 +101,13 @@ const Content = () => {
           <h1>Select a Chapter</h1>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
             {Array.from({ length: books.books.find(book => book.book === selectedBook)?.chapters || 0 }, (_, index) => (
-              <button
-                key={index + 1}
-                onClick={() => { setSelectedChapter(index + 1); setPage(2); }}
-                style={{
-                  padding: '10px',
-                  background: '#28a745', // Green color
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  transition: 'background 0.3s ease',
-                  backgroundColor: selectedChapter === index + 1 ? '#28a745' : '#28a745', // Keep the green color
-                }}
-              >
-                Chapter {index + 1}
-              </button>
+              <div key={index + 1}>
+                <ButtonItem
+                  onClick={() => { setSelectedChapter(index + 1); setPage(2); }}
+                >
+                  Chapter {index + 1}
+                </ButtonItem>
+              </div>
             ))}
           </div>
         </>
@@ -225,6 +195,8 @@ const Content = () => {
     </div>
   );
 };
+
+
 
 
 

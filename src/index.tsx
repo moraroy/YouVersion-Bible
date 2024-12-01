@@ -89,7 +89,7 @@ const Content = () => {
                     border: 'none',
                     borderRadius: '5px',
                     cursor: 'pointer',
-                    opacity: 1, // Make it invisible but still clickable
+                    opacity: 1, // Invisible but clickable
                   }}
                 >
                   <ButtonItem
@@ -199,6 +199,8 @@ const Content = () => {
     </div>
   );
 };
+
+
 
 
 

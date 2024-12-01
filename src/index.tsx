@@ -74,22 +74,34 @@ const Content = () => {
         <>
           <h1>Select a Book</h1>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
-            {books.books.map((book) => (
+            {books.books.map((book, index) => (
               <div key={book.book} style={{ position: 'relative' }}>
-                {/* Invisible ButtonItem, keeps functionality */}
-                <div
+                {/* Book Button */}
+                <button
+                  onClick={() => { setSelectedBook(book.book); setPage(1); }}
+                  onFocus={() => setFocusedBookIndex(index)} // Update the focused book index on focus
                   style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    width: '100%',
                     padding: '10px',
                     background: '#007bff',
                     color: '#fff',
                     border: 'none',
                     borderRadius: '5px',
                     cursor: 'pointer',
-                    opacity: 1, // Invisible but clickable
+                    transition: 'background 0.3s ease',
+                    backgroundColor: selectedBook === book.book ? '#28a745' : '#007bff',
+                    outline: focusedBookIndex === index ? '3px solid #ffeb3b' : 'none', // Highlight focused button
+                  }}
+                >
+                  {book.book}
+                </button>
+
+                {/* ButtonItem component wrapped in a div (for styling) */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    width: '100%',
                   }}
                 >
                   <ButtonItem
@@ -181,28 +193,38 @@ const Content = () => {
       )}
 
       {/* Pagination Controls */}
-      <div style={{ marginTop: '20px', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ marginTop: '20px', textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '20px' }}>
+        <button
+          onClick={() => setPage(page - 1)}
+          disabled={page === 0}
+          style={{
+            padding: '10px',
+            background: page === 0 ? '#6c757d' : '#007bff',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: page === 0 ? 'not-allowed' : 'pointer',
+          }}
+        >
+          Previous
+        </button>
         <button
           onClick={handleNextChapter}
           style={{
-            padding: '10px 15px',
-            background: '#28a745',
+            padding: '10px',
+            background: '#007bff',
             color: '#fff',
             border: 'none',
             borderRadius: '5px',
             cursor: 'pointer',
           }}
         >
-          Next Chapter
+          Next
         </button>
       </div>
     </div>
   );
 };
-
-
-
-
 
 
 

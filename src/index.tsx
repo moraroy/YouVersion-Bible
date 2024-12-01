@@ -11,8 +11,6 @@ const Content = () => {
   const [page, setPage] = useState(0);  // Page state for navigation
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
-  const [selectedVerse, setSelectedVerse] = useState<string | null>(null);
-  const [focusedBookIndex, setFocusedBookIndex] = useState<number | null>(null); // To manage keyboard navigation
 
   // Create a ref object for each verse
   const verseRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -26,8 +24,6 @@ const Content = () => {
   // Handle Next Chapter button click
   const handleNextChapter = () => {
     if (selectedBook && selectedChapter) {
-      const chapterKey = `${selectedBook} ${selectedChapter}:1`;  // Start at chapter 1
-      setSelectedVerse(chapterKey);
       setPage(2);  // Move to verses page
     }
   };
@@ -37,26 +33,10 @@ const Content = () => {
     if (verseRefs.current[verseKey]) {
       verseRefs.current[verseKey]?.scrollIntoView({ behavior: 'smooth' });
     }
-    setSelectedVerse(verseKey); // Update the selected verse state
-  };
-
-  // Handle keyboard navigation for book selection
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (page === 0 && books.books.length > 0) {
-      if (event.key === 'ArrowDown') {
-        setFocusedBookIndex((prevIndex) => (prevIndex === null || prevIndex === books.books.length - 1 ? 0 : prevIndex + 1));
-      } else if (event.key === 'ArrowUp') {
-        setFocusedBookIndex((prevIndex) => (prevIndex === null || prevIndex === 0 ? books.books.length - 1 : prevIndex - 1));
-      } else if (event.key === 'Enter' && focusedBookIndex !== null) {
-        const book = books.books[focusedBookIndex];
-        setSelectedBook(book.book);
-        setPage(1);
-      }
-    }
   };
 
   return (
-    <div style={{ padding: '20px' }} onKeyDown={handleKeyDown} tabIndex={0}>
+    <div style={{ padding: '20px' }}>
       {/* Verse of the Day Section - Only on Page 0 */}
       {page === 0 && verseOfTheDay && (
         <div style={{ marginBottom: '20px', background: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>
@@ -74,21 +54,14 @@ const Content = () => {
         <>
           <h1>Select a Book</h1>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
-            {books.books.map((book, index) => (
+            {books.books.map((book) => (
               <div key={book.book} style={{ position: 'relative' }}>
                 {/* Book Button */}
-                <div
-                  onFocus={() => setFocusedBookIndex(index)} // Update focused book index on focus
-                  style={{
-                    outline: focusedBookIndex === index ? '3px solid #ffeb3b' : 'none', // Highlight focused button
-                  }}
+                <ButtonItem
+                  onClick={() => { setSelectedBook(book.book); setPage(1); }}
                 >
-                  <ButtonItem
-                    onClick={() => { setSelectedBook(book.book); setPage(1); }}
-                  >
-                    {book.book}
-                  </ButtonItem>
-                </div>
+                  {book.book}
+                </ButtonItem>
               </div>
             ))}
           </div>
@@ -122,22 +95,13 @@ const Content = () => {
               {Object.keys(verses)
                 .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`)) // Filter verses of the selected chapter
                 .map((verseKey) => (
-                  <button
-                    key={verseKey}
-                    onClick={() => scrollToVerse(verseKey)} // Scroll to the selected verse
-                    style={{
-                      padding: '10px',
-                      background: '#6f42c1', // Purple color
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '5px',
-                      cursor: 'pointer',
-                      transition: 'background 0.3s ease',
-                      backgroundColor: selectedVerse === verseKey ? '#28a745' : '#6f42c1',
-                    }}
-                  >
-                    {verseKey.split(':')[1]} {/* Display the verse number */}
-                  </button>
+                  <div key={verseKey}>
+                    <ButtonItem
+                      onClick={() => scrollToVerse(verseKey)} // Scroll to the selected verse
+                    >
+                      {verseKey.split(':')[1]} {/* Display the verse number */}
+                    </ButtonItem>
+                  </div>
                 ))}
             </div>
           </div>
@@ -195,7 +159,6 @@ const Content = () => {
     </div>
   );
 };
-
 
 
 

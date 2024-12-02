@@ -1,14 +1,14 @@
-import { definePlugin, ButtonItem } from "decky-frontend-lib";  // Import ButtonItem from decky-frontend-lib
+import { definePlugin, ButtonItem } from "decky-frontend-lib"; 
 import { useState, useRef } from "react";
 import { FaBible } from "react-icons/fa";
-import { useVOTD } from './getVOTD';  // Import the custom hook
-import books from './books.json';    // Import books data
-import verses from './verses.json';  // Import verses data
+import { useVOTD } from './getVOTD';  
+import books from './books.json';    
+import verses from './verses.json';  
 
 // Content component displaying Verse of the Day
 const Content = () => {
   const { verseOfTheDay } = useVOTD();
-  const [page, setPage] = useState(0);  // Page state for navigation
+  const [page, setPage] = useState(0);  
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
 
@@ -24,7 +24,7 @@ const Content = () => {
   // Handle Next Chapter button click
   const handleNextChapter = () => {
     if (selectedBook && selectedChapter) {
-      setPage(2);  // Move to verses page
+      setPage(2);  
     }
   };
 
@@ -53,9 +53,9 @@ const Content = () => {
       {page === 0 && (
         <>
           <h1>Select a Book</h1>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '10px' }}>
             {books.books.map((book) => (
-              <div key={book.book} style={{ position: 'relative' }}>
+              <div key={book.book}>
                 {/* Book Button */}
                 <ButtonItem
                   onClick={() => { setSelectedBook(book.book); setPage(1); }}
@@ -127,7 +127,7 @@ const Content = () => {
       )}
 
       {/* Pagination Controls */}
-      <div style={{ marginTop: '20px', textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '20px' }}>
+      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '20px' }}>
         <button
           onClick={() => setPage(page - 1)}
           disabled={page === 0}
@@ -159,9 +159,6 @@ const Content = () => {
     </div>
   );
 };
-
-
-
 
 export default definePlugin(() => {
   return {

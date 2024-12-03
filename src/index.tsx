@@ -1,5 +1,5 @@
 import { definePlugin, ButtonItem } from "decky-frontend-lib";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FaBible } from "react-icons/fa";
 import { useVOTD } from './getVOTD';  
 import books from './books.json';    
@@ -13,7 +13,7 @@ const Content = () => {
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
 
   // State to track new update availability
-  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState<boolean | null>(null);
 
   // Create a ref object for each verse
   const verseRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -38,10 +38,42 @@ const Content = () => {
     }
   };
 
-  // Simulate an update check
+  // Establish WebSocket connection to check for updates
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:8777/check_update');
+    
+    ws.onopen = () => {
+      console.log("WebSocket connection established for version checking");
+    };
+    
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.status === "Up-to-date") {
+        setUpdateAvailable(false);
+      } else if (data.status === "Update Available") {
+        setUpdateAvailable(true);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket Error: ", error);
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    // Cleanup WebSocket connection when component unmounts
+    return () => {
+      ws.close();
+    };
+  }, []);
+
+  // Handle the update check button click (this will trigger the server to send version info)
   const checkForUpdates = () => {
-    // Simulate an update being available (for testing)
-    setUpdateAvailable(true);
+    // No need to do anything here; the WebSocket is already listening
+    // The message will be sent automatically when the server pushes updates
+    console.log("Checking for updates...");
   };
 
   return (

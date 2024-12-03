@@ -28,7 +28,7 @@ class Plugin:
     async def _main(self):
         decky_plugin.logger.info("This is _main being called")
 
-        # Define the fetch_data function using requests inside _main
+        # Define the fetch_data function using requests inside _main for Verse of the Day
         async def fetch_data():
             URL = "https://www.bible.com/en/verse-of-the-day"
             decky_plugin.logger.info(f"Fetching data from {URL}")
@@ -133,9 +133,25 @@ class Plugin:
             finally:
                 await ws.close()
 
+        # WebSocket handler to check for updates
+        async def handle_check_update(request):
+            ws = web.WebSocketResponse()
+            await ws.prepare(request)
+
+            try:
+                # Fetch and compare the versions
+                version_info = await self.compare_versions()
+                await ws.send_json(version_info)
+            except Exception as e:
+                decky_plugin.logger.error(f"Error handling update check: {e}")
+                await ws.send_json({"error": "Internal error"})
+            finally:
+                await ws.close()
+
         # Set up the web application
         app = web.Application()
         app.router.add_get('/votd_ws', handle_votd_ws)
+        app.router.add_get('/check_update', handle_check_update)
 
         # Set up the web server
         runner = web.AppRunner(app)
@@ -147,7 +163,56 @@ class Plugin:
         # Keep the server running indefinitely
         await asyncio.Event().wait()
 
+    # Function to fetch GitHub package.json version
+    async def fetch_github_version(self):
+        github_url = "https://raw.githubusercontent.com/moraroy/YouVersion-Bible/main/package.json"
+        decky_plugin.logger.info(f"Fetching GitHub version from {github_url}")
+        loop = asyncio.get_event_loop()
+        try:
+            response = await loop.run_in_executor(None, requests.get, github_url)
+            response.raise_for_status()  # Will raise an error for 4xx/5xx responses
+            decky_plugin.logger.info("Successfully fetched GitHub version")
+            return response.json()  # This will return the parsed JSON directly
+        except requests.exceptions.RequestException as e:
+            decky_plugin.logger.error(f"Error fetching GitHub version: {e}")
+            return None
+
+    # Function to read local package.json version
+    async def fetch_local_version(self):
+        local_package_path = "package.json"
+        try:
+            with open(local_package_path, "r") as file:
+                data = json.load(file)
+                decky_plugin.logger.info("Successfully read local package.json")
+                return data["version"]
+        except FileNotFoundError:
+            decky_plugin.logger.error(f"Local {local_package_path} not found!")
+            return None
+        except json.JSONDecodeError:
+            decky_plugin.logger.error(f"Failed to parse {local_package_path}")
+            return None
+
+    # Compare versions
+    async def compare_versions(self):
+        local_version = await self.fetch_local_version()
+        github_data = await self.fetch_github_version()
+
+        if not local_version or not github_data:
+            return {"error": "Could not fetch version information"}
+
+        github_version = github_data.get("version")
+        if not github_version:
+            return {"error": "GitHub version not found"}
+
+        decky_plugin.logger.info(f"Local Version: {local_version}, GitHub Version: {github_version}")
+
+        if local_version == github_version:
+            return {"status": "Up-to-date", "local_version": local_version, "github_version": github_version}
+        else:
+            return {"status": "Update Available", "local_version": local_version, "github_version": github_version}
+
     async def _unload(self):
         decky_plugin.logger.info("Plugin Unloaded!")
         # Perform any necessary cleanup
         pass
+

@@ -12,6 +12,9 @@ const Content = () => {
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
 
+  // State to track new update availability
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+
   // Create a ref object for each verse
   const verseRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -35,8 +38,39 @@ const Content = () => {
     }
   };
 
+  // Simulate an update check
+  const checkForUpdates = () => {
+    // Simulate an update being available (for testing)
+    setUpdateAvailable(true);
+  };
+
   return (
     <div style={{ padding: '20px' }}>
+      {/* New Update Indicator */}
+      {updateAvailable && (
+        <div style={{
+          position: 'absolute', 
+          top: '20px', 
+          right: '20px', 
+          backgroundColor: 'red', 
+          color: 'white', 
+          padding: '10px 15px', 
+          borderRadius: '50%', 
+          fontSize: '14px', 
+          fontWeight: 'bold',
+          cursor: 'pointer',
+        }} onClick={() => setUpdateAvailable(false)}>
+          New
+        </div>
+      )}
+
+      {/* Simulate an update check button */}
+      <button 
+        onClick={checkForUpdates} 
+        style={{ position: 'absolute', top: '50px', right: '20px' }}>
+        Check for Updates
+      </button>
+
       {/* Verse of the Day Section - Only on Page 0 */}
       {page === 0 && verseOfTheDay && (
         <div style={{ marginBottom: '20px', background: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>

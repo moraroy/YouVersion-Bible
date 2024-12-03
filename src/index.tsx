@@ -1,4 +1,4 @@
-import { definePlugin, ButtonItem } from "decky-frontend-lib"; 
+import { definePlugin, ButtonItem } from "decky-frontend-lib";
 import { useState, useRef } from "react";
 import { FaBible } from "react-icons/fa";
 import { useVOTD } from './getVOTD';  
@@ -56,10 +56,7 @@ const Content = () => {
           <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '10px' }}>
             {books.books.map((book) => (
               <div key={book.book}>
-                {/* Book Button */}
-                <ButtonItem
-                  onClick={() => { setSelectedBook(book.book); setPage(1); }}
-                >
+                <ButtonItem onClick={() => { setSelectedBook(book.book); setPage(1); }}>
                   {book.book}
                 </ButtonItem>
               </div>
@@ -75,9 +72,7 @@ const Content = () => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
             {Array.from({ length: books.books.find(book => book.book === selectedBook)?.chapters || 0 }, (_, index) => (
               <div key={index + 1}>
-                <ButtonItem
-                  onClick={() => { setSelectedChapter(index + 1); setPage(2); }}
-                >
+                <ButtonItem onClick={() => { setSelectedChapter(index + 1); setPage(2); }}>
                   Chapter {index + 1}
                 </ButtonItem>
               </div>
@@ -112,7 +107,12 @@ const Content = () => {
       {page === 2 && selectedBook && selectedChapter && (
         <>
           <h1>{selectedBook} Chapter {selectedChapter}</h1>
-          <div>
+          <div
+            style={{
+              maxHeight: '500px',  // Adjust this height as needed
+              overflowY: 'auto',  // Enable vertical scrolling only for verses
+            }}
+          >
             {Object.keys(verses)
               .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`))
               .map((verseKey) => (

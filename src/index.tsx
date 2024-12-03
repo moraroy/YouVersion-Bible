@@ -69,13 +69,6 @@ const Content = () => {
     };
   }, []);
 
-  // Handle the update check button click (this will trigger the server to send version info)
-  const checkForUpdates = () => {
-    // No need to do anything here; the WebSocket is already listening
-    // The message will be sent automatically when the server pushes updates
-    console.log("Checking for updates...");
-  };
-
   return (
     <div style={{ padding: '20px' }}>
       {/* New Update Indicator */}
@@ -95,13 +88,6 @@ const Content = () => {
           New
         </div>
       )}
-
-      {/* Simulate an update check button */}
-      <button 
-        onClick={checkForUpdates} 
-        style={{ position: 'absolute', top: '50px', right: '20px' }}>
-        Check for Updates
-      </button>
 
       {/* Verse of the Day Section - Only on Page 0 */}
       {page === 0 && verseOfTheDay && (

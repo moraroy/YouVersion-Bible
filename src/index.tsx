@@ -1,5 +1,5 @@
 import { definePlugin, ButtonItem } from "decky-frontend-lib";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { FaBible } from "react-icons/fa";
 import { useVOTD } from './getVOTD';  
 import books from './books.json';    
@@ -7,13 +7,10 @@ import verses from './verses.json';
 
 // Content component displaying Verse of the Day
 const Content = () => {
-  const { verseOfTheDay } = useVOTD();
+  const { verseOfTheDay, updateAvailable } = useVOTD();
   const [page, setPage] = useState(0);  
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
-
-  // State to track new update availability
-  const [updateAvailable, setUpdateAvailable] = useState<boolean | null>(null);
 
   // Create a ref object for each verse
   const verseRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -38,53 +35,25 @@ const Content = () => {
     }
   };
 
-  // Establish WebSocket connection to check for updates
-  useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8777/check_update');
-    
-    ws.onopen = () => {
-      console.log("WebSocket connection established for version checking");
-    };
-    
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.status === "Up-to-date") {
-        setUpdateAvailable(false);
-      } else if (data.status === "Update Available") {
-        setUpdateAvailable(true);
-      }
-    };
-
-    ws.onerror = (error) => {
-      console.error("WebSocket Error: ", error);
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket connection closed");
-    };
-
-    // Cleanup WebSocket connection when component unmounts
-    return () => {
-      ws.close();
-    };
-  }, []);
-
   return (
     <div style={{ padding: '20px' }}>
       {/* New Update Indicator */}
       {updateAvailable && (
-        <div style={{
-          position: 'absolute', 
-          top: '20px', 
-          right: '20px', 
-          backgroundColor: 'red', 
-          color: 'white', 
-          padding: '10px 15px', 
-          borderRadius: '50%', 
-          fontSize: '14px', 
-          fontWeight: 'bold',
-          cursor: 'pointer',
-        }} onClick={() => setUpdateAvailable(false)}>
+        <div 
+          style={{
+            position: 'absolute', 
+            top: '20px', 
+            right: '20px', 
+            backgroundColor: 'red', 
+            color: 'white', 
+            padding: '10px 15px', 
+            borderRadius: '50%', 
+            fontSize: '14px', 
+            fontWeight: 'bold',
+            cursor: 'pointer',
+          }}
+          onClick={() => alert('Update Available!')}
+        >
           New
         </div>
       )}
@@ -95,7 +64,10 @@ const Content = () => {
           <h2>Verse of the Day</h2>
           <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
-          <button onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)} style={{ marginTop: '10px', background: '#28a745', color: '#fff', padding: '10px 15px', borderRadius: '5px', border: 'none' }}>
+          <button 
+            onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)} 
+            style={{ marginTop: '10px', background: '#28a745', color: '#fff', padding: '10px 15px', borderRadius: '5px', border: 'none' }}
+          >
             Read Aloud
           </button>
         </div>

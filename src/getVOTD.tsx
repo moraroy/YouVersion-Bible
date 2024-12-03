@@ -12,7 +12,10 @@ export const useVOTD = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // WebSocket connection to fetch Verse of the Day data
+  // New state to track if an update is available
+  const [updateAvailable, setUpdateAvailable] = useState<boolean | null>(null);
+
+  // WebSocket connection to fetch Verse of the Day data and update check
   const fetchVerseOfTheDay = (): (() => void) => {
     setLoading(true);
     console.log("Connecting to WebSocket for Verse of the Day...");
@@ -23,13 +26,15 @@ export const useVOTD = () => {
       console.log("WebSocket connected");
     };
 
+    // Handle Verse of the Day message
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log("Received Verse of the Day:", data);
+      console.log("Received WebSocket message:", data);
 
+      // Check if the message contains verse of the day data
       if (data.error) {
         setError(data.error);
-      } else {
+      } else if (data.citation) {
         const { citation, passage, images, version } = data;
         setVerseOfTheDay({
           citation: citation.toString(),
@@ -38,6 +43,14 @@ export const useVOTD = () => {
           version: version ?? "Unknown",
         });
       }
+
+      // Check for update availability
+      if (data.status === "Up-to-date") {
+        setUpdateAvailable(false);
+      } else if (data.status === "Update Available") {
+        setUpdateAvailable(true);
+      }
+
       setLoading(false);
     };
 
@@ -63,5 +76,5 @@ export const useVOTD = () => {
     };
   }, []);
 
-  return { verseOfTheDay, error, loading };
+  return { verseOfTheDay, error, loading, updateAvailable };
 };

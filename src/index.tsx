@@ -2,12 +2,14 @@ import { definePlugin, ButtonItem } from "decky-frontend-lib";
 import { useState, useRef } from "react";
 import { FaBible } from "react-icons/fa";
 import { useVOTD } from './getVOTD';  
+import { useUpdateInfo } from './getUpdate'; // Import the custom useUpdateInfo hook
 import books from './books.json';    
 import verses from './verses.json';  
 
 // Content component displaying Verse of the Day
 const Content = () => {
-  const { verseOfTheDay, updateAvailable } = useVOTD();
+  const { verseOfTheDay } = useVOTD();
+  const { updateInfo } = useUpdateInfo();  // Use the custom hook for update info
   const [page, setPage] = useState(0);  
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
@@ -34,6 +36,9 @@ const Content = () => {
       verseRefs.current[verseKey]?.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  // Check if an update is available based on the status
+  const updateAvailable = updateInfo?.status === "Update available";
 
   return (
     <div style={{ padding: '20px' }}>

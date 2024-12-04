@@ -59,7 +59,7 @@ const Content = () => {
           }}
           onClick={() => alert('Update Available!')}
         >
-          New
+          New Update Available!
         </div>
       )}
 

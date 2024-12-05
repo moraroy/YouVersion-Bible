@@ -46,8 +46,8 @@ const Content = () => {
       {updateAvailable && (
         <div 
           style={{
-            position: 'fixed',
-            top: '20px', 
+            position: 'absolute',
+            top: '10px', 
             right: '20px', 
             backgroundColor: 'red', 
             color: 'white', 
@@ -56,6 +56,7 @@ const Content = () => {
             fontSize: '14px', 
             fontWeight: 'bold',
             cursor: 'pointer',
+            zIndex: 10, // Ensure it appears on top of other elements
           }}
           onClick={() => alert('Update Available!')}
         >
@@ -65,7 +66,15 @@ const Content = () => {
 
       {/* Verse of the Day Section - Only on Page 0 */}
       {page === 0 && verseOfTheDay && (
-        <div style={{ marginBottom: '20px', background: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>
+        <div 
+          style={{
+            marginBottom: '20px', 
+            background: '#f9f9f9', 
+            padding: '30px 10px 10px 10px', // Add padding on top to make space for the notification
+            borderRadius: '5px',
+            position: 'relative', // Position relative to allow absolute positioning of the notification
+          }}
+        >
           <h2>Verse of the Day</h2>
           <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>

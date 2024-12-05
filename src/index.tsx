@@ -47,7 +47,7 @@ const Content = () => {
         <div 
           style={{
             position: 'absolute',
-            top: '10px', 
+            top: '30px',
             right: '20px', 
             backgroundColor: 'red', 
             color: 'white', 
@@ -56,7 +56,7 @@ const Content = () => {
             fontSize: '14px', 
             fontWeight: 'bold',
             cursor: 'pointer',
-            zIndex: 10, // Ensure it appears on top of other elements
+            zIndex: 10,
           }}
           onClick={() => alert('Update Available!')}
         >

@@ -46,13 +46,13 @@ const Content = () => {
       {updateAvailable && (
         <div 
           style={{
-            position: 'absolute', 
+            position: 'fixed',
             top: '20px', 
             right: '20px', 
             backgroundColor: 'red', 
             color: 'white', 
-            padding: '10px 15px', 
-            borderRadius: '50%', 
+            padding: '10px 20px',
+            borderRadius: '5px',
             fontSize: '14px', 
             fontWeight: 'bold',
             cursor: 'pointer',

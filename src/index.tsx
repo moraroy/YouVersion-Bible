@@ -138,7 +138,16 @@ const Content = () => {
               {Object.keys(verses)
                 .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`)) // Filter verses of the selected chapter
                 .map((verseKey) => (
-                  <div key={verseKey}>
+                  <div 
+                    key={verseKey}
+                    style={{
+                      backgroundColor: '#6f42c1',  // Purple background for verse cards
+                      borderRadius: '8px',         // Rounded corners
+                      padding: '10px',             // Padding inside the card
+                      margin: '5px',               // Margin between the cards
+                      textAlign: 'center',         // Center the text inside
+                    }}
+                  >
                     <ButtonItem
                       onClick={() => scrollToVerse(verseKey)} // Scroll to the selected verse
                     >

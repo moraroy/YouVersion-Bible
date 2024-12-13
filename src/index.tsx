@@ -78,12 +78,12 @@ const Content = () => {
           <h2>Verse of the Day</h2>
           <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
-          <button 
+          {/* Replace the Read Aloud button with ButtonItem from decky */}
+          <ButtonItem 
             onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)} 
-            style={{ marginTop: '10px', background: '#28a745', color: '#fff', padding: '10px 15px', borderRadius: '5px', border: 'none' }}
           >
             Read Aloud
-          </button>
+          </ButtonItem>
         </div>
       )}
 
@@ -205,3 +205,4 @@ export default definePlugin(() => {
     icon: <FaBible />,
   };
 });
+

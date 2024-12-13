@@ -45,7 +45,7 @@
     "axios": "^1.6.7",
     "cheerio": "^1.0.0-rc.12",
     "cheerio-select": "^2.1.0",
-    "decky-frontend-lib": "^3.24.5",
+    "decky-frontend-lib": "^3.25.0",
     "react-icons": "^4.4.0"
   },
   "pnpm": {

@@ -78,18 +78,19 @@ const Content = () => {
           <h2>Verse of the Day</h2>
           <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
-          {/* Read Aloud and Go To buttons */}
-          <div style={{ display: 'flex', gap: '10px' }}>
+          {/* Go To and Read Aloud buttons */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {/* Go To button */}
+            <ButtonItem 
+              onClick={() => scrollToVerse(verseOfTheDay.citation)} 
+            >
+              Go To
+            </ButtonItem>
+            {/* Read Aloud button */}
             <ButtonItem 
               onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)} 
             >
               Read Aloud
-            </ButtonItem>
-            {/* Go To button */}
-            <ButtonItem 
-              onClick={() => scrollToVerse(`${verseOfTheDay.citation}`)} 
-            >
-              Go To
             </ButtonItem>
           </div>
         </div>

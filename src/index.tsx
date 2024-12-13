@@ -93,7 +93,7 @@ const Content = () => {
           <h1>Select a Book</h1>
           <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '10px' }}>
             {books.books.map((book) => (
-              <div key={book.book}>
+              <div key={book.book} style={{ backgroundColor: '#007bff', borderRadius: '8px', padding: '10px', margin: '5px' }}>
                 <ButtonItem onClick={() => { setSelectedBook(book.book); setPage(1); }}>
                   {book.book}
                 </ButtonItem>
@@ -191,4 +191,3 @@ export default definePlugin(() => {
     icon: <FaBible />,
   };
 });
-

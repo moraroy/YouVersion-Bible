@@ -18,10 +18,10 @@ const Content = () => {
   const verseRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // Speech Synthesis handler
-  const readVerseAloud = (text: string) => {
-    const speech = new SpeechSynthesisUtterance(text);
-    window.speechSynthesis.speak(speech);
-  };
+  //const readVerseAloud = (text: string) => {
+    //const speech = new SpeechSynthesisUtterance(text);
+    //window.speechSynthesis.speak(speech);
+  //};
 
   // Handle Next Chapter button click
   const handleNextChapter = () => {
@@ -105,11 +105,11 @@ const Content = () => {
               Go To
             </ButtonItem>
             {/* Read Aloud button */}
-            <ButtonItem 
+            {/* <ButtonItem 
               onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)} 
             >
               Read Aloud
-            </ButtonItem>
+            </ButtonItem> */}
           </div>
         </div>
       )}
@@ -270,5 +270,3 @@ export default definePlugin(() => {
     icon: <FaBible />,
   };
 });
-
-

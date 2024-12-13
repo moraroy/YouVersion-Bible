@@ -121,7 +121,7 @@ const Content = () => {
           {/* Wrap all books in one card container */}
           <div
             style={{
-              backgroundColor: '#f1f1f1', // Light background for the card
+              backgroundColor: '#007bff', // Light background for the card
               borderRadius: '10px', // Rounded corners for the card
               padding: '20px', // Add some padding inside the card
               margin: '10px', // Margin around the card

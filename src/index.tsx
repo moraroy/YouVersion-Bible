@@ -118,14 +118,25 @@ const Content = () => {
       {page === 0 && (
         <>
           <h1>Select a Book</h1>
-          <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '10px' }}>
-            {books.books.map((book) => (
-              <div key={book.book} style={{ backgroundColor: '#007bff', borderRadius: '8px', padding: '10px', margin: '5px' }}>
-                <ButtonItem onClick={() => { setSelectedBook(book.book); setPage(1); }}>
-                  {book.book}
-                </ButtonItem>
-              </div>
-            ))}
+          {/* Wrap all books in one card container */}
+          <div
+            style={{
+              backgroundColor: '#f1f1f1', // Light background for the card
+              borderRadius: '10px', // Rounded corners for the card
+              padding: '20px', // Add some padding inside the card
+              margin: '10px', // Margin around the card
+              boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', // Optional shadow for the card
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '10px' }}>
+              {books.books.map((book) => (
+                <div key={book.book} style={{ backgroundColor: '#007bff', borderRadius: '8px', padding: '10px', margin: '5px' }}>
+                  <ButtonItem onClick={() => { setSelectedBook(book.book); setPage(1); }}>
+                    {book.book}
+                  </ButtonItem>
+                </div>
+              ))}
+            </div>
           </div>
         </>
       )}

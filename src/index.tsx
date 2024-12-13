@@ -166,33 +166,19 @@ const Content = () => {
 
       {/* Pagination Controls */}
       <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '20px' }}>
-        <button
+        {/* Replace Previous Button with ButtonItem */}
+        <ButtonItem
           onClick={() => setPage(page - 1)}
           disabled={page === 0}
-          style={{
-            padding: '10px',
-            background: page === 0 ? '#6c757d' : '#007bff',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: page === 0 ? 'not-allowed' : 'pointer',
-          }}
         >
           Previous
-        </button>
-        <button
+        </ButtonItem>
+        {/* Replace Next Button with ButtonItem */}
+        <ButtonItem
           onClick={handleNextChapter}
-          style={{
-            padding: '10px',
-            background: '#007bff',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
         >
           Next
-        </button>
+        </ButtonItem>
       </div>
     </div>
   );

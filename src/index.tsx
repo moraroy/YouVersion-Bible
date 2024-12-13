@@ -78,6 +78,24 @@ const Content = () => {
           <h2>Verse of the Day</h2>
           <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
+          <p><em>Version: {verseOfTheDay.version}</em></p> {/* Display Version */}
+
+          {/* Display Images if available */}
+          {verseOfTheDay.images && verseOfTheDay.images.length > 0 && (
+            <div style={{ marginTop: '20px' }}>
+              <h3>Images for Verse of the Day</h3>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                {verseOfTheDay.images.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`Image for ${verseOfTheDay.citation}`}
+                    style={{ width: '100px', height: 'auto', borderRadius: '5px' }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
           {/* Go To and Read Aloud buttons */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {/* Go To button */}

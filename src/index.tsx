@@ -109,8 +109,18 @@ const Content = () => {
           <h1>Select a Chapter</h1>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
             {Array.from({ length: books.books.find(book => book.book === selectedBook)?.chapters || 0 }, (_, index) => (
-              <div key={index + 1}>
-                <ButtonItem onClick={() => { setSelectedChapter(index + 1); setPage(2); }}>
+              <div 
+                key={index + 1}
+                style={{
+                  backgroundColor: '#28a745',  // Green background for chapter cards
+                  borderRadius: '8px',        // Rounded corners
+                  padding: '10px',            // Padding around the button
+                  margin: '5px',              // Margin between the buttons
+                }}
+              >
+                <ButtonItem 
+                  onClick={() => { setSelectedChapter(index + 1); setPage(2); }}
+                >
                   Chapter {index + 1}
                 </ButtonItem>
               </div>

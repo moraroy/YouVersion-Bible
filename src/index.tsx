@@ -178,33 +178,43 @@ const Content = () => {
         </>
       )}
 
-      {/* Page 2 - Display Purple Verse Buttons */}
+      {/* Page 2 - Display Verse Buttons under One Card */}
       {page === 2 && selectedBook && selectedChapter && (
         <>
           <div style={{ marginBottom: '20px' }}>
             <h2>Select a Verse</h2>
-            {/* Wrap all verses in purple card container */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px' }}>
-              {Object.keys(verses)
-                .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`)) // Filter verses of the selected chapter
-                .map((verseKey) => (
-                  <div 
-                    key={verseKey}
-                    style={{
-                      backgroundColor: '#6f42c1',  // Purple background for verse cards
-                      borderRadius: '8px',         // Rounded corners
-                      padding: '10px',             // Padding inside the card
-                      margin: '5px',               // Margin between the cards
-                      textAlign: 'center',         // Center the text inside
-                    }}
-                  >
-                    <ButtonItem
-                      onClick={() => scrollToVerse(verseKey)} // Scroll to the selected verse
+            {/* Wrap all verse buttons inside one card container */}
+            <div
+              style={{
+                backgroundColor: '#6f42c1',  // Purple background for the verse card container
+                borderRadius: '10px',        // Rounded corners for the card
+                padding: '20px',             // Padding inside the card
+                margin: '10px',              // Margin around the card
+                boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', // Optional shadow for the card
+              }}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px' }}>
+                {Object.keys(verses)
+                  .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`)) // Filter verses of the selected chapter
+                  .map((verseKey) => (
+                    <div 
+                      key={verseKey}
+                      style={{
+                        backgroundColor: '#6f42c1',  // Purple background for verse cards
+                        borderRadius: '8px',         // Rounded corners
+                        padding: '10px',             // Padding inside the card
+                        margin: '5px',               // Margin between the cards
+                        textAlign: 'center',         // Center the text inside
+                      }}
                     >
-                      {verseKey.split(':')[1]} {/* Display the verse number */}
-                    </ButtonItem>
-                  </div>
-                ))}
+                      <ButtonItem
+                        onClick={() => scrollToVerse(verseKey)} // Scroll to the selected verse
+                      >
+                        {verseKey.split(':')[1]} {/* Display the verse number */}
+                      </ButtonItem>
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
         </>
@@ -260,4 +270,5 @@ export default definePlugin(() => {
     icon: <FaBible />,
   };
 });
+
 

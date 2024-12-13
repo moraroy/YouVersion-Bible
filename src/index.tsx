@@ -78,12 +78,20 @@ const Content = () => {
           <h2>Verse of the Day</h2>
           <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
-          {/* Replace the Read Aloud button with ButtonItem from decky */}
-          <ButtonItem 
-            onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)} 
-          >
-            Read Aloud
-          </ButtonItem>
+          {/* Read Aloud and Go To buttons */}
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <ButtonItem 
+              onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)} 
+            >
+              Read Aloud
+            </ButtonItem>
+            {/* Go To button */}
+            <ButtonItem 
+              onClick={() => scrollToVerse(`${verseOfTheDay.citation}`)} 
+            >
+              Go To
+            </ButtonItem>
+          </div>
         </div>
       )}
 
@@ -185,14 +193,14 @@ const Content = () => {
 
       {/* Pagination Controls */}
       <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '20px' }}>
-        {/* Replace Previous Button with ButtonItem */}
+        {/* Previous Button */}
         <ButtonItem
           onClick={() => setPage(page - 1)}
           disabled={page === 0}
         >
           Previous
         </ButtonItem>
-        {/* Replace Next Button with ButtonItem */}
+        {/* Next Button */}
         <ButtonItem
           onClick={handleNextChapter}
         >
@@ -210,3 +218,4 @@ export default definePlugin(() => {
     icon: <FaBible />,
   };
 });
+

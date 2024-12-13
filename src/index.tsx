@@ -145,24 +145,35 @@ const Content = () => {
       {page === 1 && selectedBook && (
         <>
           <h1>Select a Chapter</h1>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '10px' }}>
-            {Array.from({ length: books.books.find(book => book.book === selectedBook)?.chapters || 0 }, (_, index) => (
-              <div 
-                key={index + 1}
-                style={{
-                  backgroundColor: '#28a745',  // Green background for chapter cards
-                  borderRadius: '8px',        // Rounded corners
-                  padding: '10px',            // Padding around the button
-                  margin: '5px',              // Margin between the buttons
-                }}
-              >
-                <ButtonItem 
-                  onClick={() => { setSelectedChapter(index + 1); setPage(2); }}
+          {/* Wrap all chapters in one card container */}
+          <div
+            style={{
+              backgroundColor: '#28a745',  // Green background for the card container
+              borderRadius: '10px',        // Rounded corners for the card
+              padding: '20px',             // Padding inside the card
+              margin: '10px',              // Margin around the card
+              boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', // Optional shadow for the card
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '10px' }}>
+              {Array.from({ length: books.books.find(book => book.book === selectedBook)?.chapters || 0 }, (_, index) => (
+                <div
+                  key={index + 1}
+                  style={{
+                    backgroundColor: '#28a745',  // Green background for chapter cards
+                    borderRadius: '8px',        // Rounded corners for chapter cards
+                    padding: '10px',            // Padding around the button
+                    margin: '5px',              // Margin between the buttons
+                  }}
                 >
-                  Chapter {index + 1}
-                </ButtonItem>
-              </div>
-            ))}
+                  <ButtonItem 
+                    onClick={() => { setSelectedChapter(index + 1); setPage(2); }}
+                  >
+                    Chapter {index + 1}
+                  </ButtonItem>
+                </div>
+              ))}
+            </div>
           </div>
         </>
       )}
@@ -172,6 +183,7 @@ const Content = () => {
         <>
           <div style={{ marginBottom: '20px' }}>
             <h2>Select a Verse</h2>
+            {/* Wrap all verses in purple card container */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px' }}>
               {Object.keys(verses)
                 .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`)) // Filter verses of the selected chapter

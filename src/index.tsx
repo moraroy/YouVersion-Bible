@@ -42,28 +42,6 @@ const Content = () => {
 
   return (
     <div style={{ padding: '20px' }}>
-      {/* New Update Indicator */}
-      {updateAvailable && (
-        <div 
-          style={{
-            position: 'absolute',
-            top: '30px',
-            right: '20px', 
-            backgroundColor: 'red', 
-            color: 'white', 
-            padding: '10px 20px',
-            borderRadius: '5px',
-            fontSize: '14px', 
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            zIndex: 10,
-          }}
-          onClick={() => alert('Update Available!')}
-        >
-          New Update Available!
-        </div>
-      )}
-
       {/* Verse of the Day Section - Only on Page 0 */}
       {page === 0 && verseOfTheDay && (
         <div 
@@ -75,6 +53,28 @@ const Content = () => {
             position: 'relative', // Position relative to allow absolute positioning of the notification
           }}
         >
+          {/* New Update Indicator - Now inside the Verse of the Day card */}
+          {updateAvailable && (
+            <div 
+              style={{
+                position: 'absolute',
+                top: '10px', // Adjust the distance from the top of the card
+                right: '10px', // Adjust the distance from the right of the card
+                backgroundColor: 'red', 
+                color: 'white', 
+                padding: '10px 20px',
+                borderRadius: '5px',
+                fontSize: '14px', 
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                zIndex: 10,
+              }}
+              onClick={() => alert('Update Available!')}
+            >
+              New Update Available!
+            </div>
+          )}
+
           <h2>Verse of the Day</h2>
           <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>

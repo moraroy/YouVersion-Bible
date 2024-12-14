@@ -17,6 +17,12 @@ const Content = () => {
   // Create a ref object for each verse
   const verseRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
+  // Speech Synthesis handler
+  //const readVerseAloud = (text: string) => {
+    //const speech = new SpeechSynthesisUtterance(text);
+    //window.speechSynthesis.speak(speech);
+  //};
+
   // Handle Next Chapter button click
   const handleNextChapter = () => {
     if (selectedBook && selectedChapter) {
@@ -264,5 +270,3 @@ export default definePlugin(() => {
     icon: <FaBible />,
   };
 });
-
-

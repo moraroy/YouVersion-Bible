@@ -17,12 +17,6 @@ const Content = () => {
   // Create a ref object for each verse
   const verseRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  // Speech Synthesis handler
-  //const readVerseAloud = (text: string) => {
-    //const speech = new SpeechSynthesisUtterance(text);
-    //window.speechSynthesis.speak(speech);
-  //};
-
   // Handle Next Chapter button click
   const handleNextChapter = () => {
     if (selectedBook && selectedChapter) {
@@ -212,6 +206,11 @@ const Content = () => {
                       >
                         {verseKey.split(':')[1]} {/* Display the verse number */}
                       </ButtonItem>
+
+                      {/* Invisible ButtonItem for each verse, wrapped in a div */}
+                      <div style={{ visibility: 'hidden', height: '0', padding: '0' }}>
+                        <ButtonItem onClick={() => scrollToVerse(verseKey)} />
+                      </div>
                     </div>
                   ))}
               </div>
@@ -237,6 +236,11 @@ const Content = () => {
                   <p>
                     <sup style={{ color: '#6f42c1', fontSize: '14px' }}>{verseKey.split(':')[1]}</sup> {verses[verseKey]}
                   </p>
+
+                  {/* Invisible ButtonItem for each verse, wrapped in a div */}
+                  <div style={{ visibility: 'hidden', height: '0', padding: '0' }}>
+                    <ButtonItem onClick={() => scrollToVerse(verseKey)} />
+                  </div>
                 </div>
               ))}
           </div>
@@ -270,3 +274,4 @@ export default definePlugin(() => {
     icon: <FaBible />,
   };
 });
+

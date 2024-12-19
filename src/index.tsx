@@ -36,25 +36,27 @@ const Content = () => {
 
   return (
     <div style={{ padding: '20px' }}>
-      {/* New Update Indicator - Centered red notification box */}
+      {/* Conditionally render the red update notification */}
       {updateAvailable && (
-        <div 
+        <div
           style={{
-            position: 'absolute', // Position relative to the page
-            top: '20px', // Space from the top
-            left: '50%', // Center horizontally
-            transform: 'translateX(-50%)', // Offset by half the width to truly center
-            backgroundColor: 'red', 
-            color: 'white', 
-            padding: '10px 20px',
-            borderRadius: '5px',
-            fontSize: '16px', 
-            fontWeight: 'bold',
-            textAlign: 'center', // Center text inside the notification
-            zIndex: 10,
+            position: 'absolute', // Fixed position to ensure it stays at the top
+            top: '20px',          // Space from the top of the page
+            left: '50%',          // Center horizontally
+            transform: 'translateX(-50%)',  // Offset by half its width to center
+            backgroundColor: 'red',  // Red background for the notification box
+            color: 'white',       // White text color
+            padding: '1em',       // Padding inside the notification box
+            borderRadius: '8px',  // Rounded corners for the box
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // Shadow effect for depth
+            maxWidth: '80%',      // Limit the width of the box
+            margin: 'auto',       // Ensure it stays centered
+            textAlign: 'center',  // Center the text inside the box
+            fontWeight: 'bold',    // Make the text bold
+            zIndex: 10,           // Make sure it overlays the content
           }}
         >
-          New Update Available!
+          A new update is available! Please update your plugin :)
         </div>
       )}
 
@@ -66,7 +68,6 @@ const Content = () => {
             background: '#f9f9f9', 
             padding: '30px 10px 10px 10px', // Add padding on top to make space for the notification
             borderRadius: '5px',
-            position: 'relative', // Position relative to allow absolute positioning of the notification
           }}
         >
           <h2>Verse of the Day</h2>
@@ -106,7 +107,6 @@ const Content = () => {
       {page === 0 && (
         <>
           <h1>Select a Book</h1>
-          {/* Wrap all books in one card container */}
           <div
             style={{
               backgroundColor: '#007bff', // Light background for the card
@@ -133,7 +133,6 @@ const Content = () => {
       {page === 1 && selectedBook && (
         <>
           <h1>Select a Chapter</h1>
-          {/* Wrap all chapters in one card container */}
           <div
             style={{
               backgroundColor: '#28a745',  // Green background for the card container
@@ -171,7 +170,6 @@ const Content = () => {
         <>
           <div style={{ marginBottom: '20px' }}>
             <h2>Select a Verse</h2>
-            {/* Wrap all verse buttons inside one card container */}
             <div
               style={{
                 backgroundColor: '#6f42c1',  // Purple background for the verse card container
@@ -183,7 +181,7 @@ const Content = () => {
             >
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px' }}>
                 {Object.keys(verses)
-                  .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`)) // Filter verses of the selected chapter
+                  .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`))
                   .map((verseKey) => (
                     <div 
                       key={verseKey}
@@ -192,12 +190,9 @@ const Content = () => {
                         borderRadius: '8px',         // Rounded corners
                         padding: '10px',             // Padding inside the card
                         margin: '5px',               // Margin between the cards
-                        textAlign: 'center',         // Center the text inside
                       }}
                     >
-                      <ButtonItem
-                        onClick={() => scrollToVerse(verseKey)} // Scroll to the selected verse
-                      >
+                      <ButtonItem onClick={() => scrollToVerse(verseKey)}>
                         {verseKey.split(':')[1]} {/* Display the verse number */}
                       </ButtonItem>
                     </div>
@@ -208,42 +203,15 @@ const Content = () => {
         </>
       )}
 
-      {/* Page 2 - Display Verses with Superscript Numbers */}
-      {page === 2 && selectedBook && selectedChapter && (
-        <>
-          <h1>{selectedBook} Chapter {selectedChapter}</h1>
-          <div
-            style={{
-              maxHeight: '500px',  // Adjust this height as needed
-              overflowY: 'auto',  // Enable vertical scrolling only for verses
-            }}
-          >
-            {Object.keys(verses)
-              .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`))
-              .map((verseKey) => (
-                <div key={verseKey} style={{ marginBottom: '10px' }} ref={(el) => verseRefs.current[verseKey] = el}>
-                  <p>
-                    <sup style={{ color: '#6f42c1', fontSize: '14px' }}>{verseKey.split(':')[1]}</sup> {verses[verseKey]}
-                  </p>
-                </div>
-              ))}
-          </div>
-        </>
-      )}
-
       {/* Pagination Controls */}
       <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '20px' }}>
-        {/* Previous Button */}
         <ButtonItem
           onClick={() => setPage(page - 1)}
           disabled={page === 0}
         >
           Previous
         </ButtonItem>
-        {/* Next Button */}
-        <ButtonItem
-          onClick={handleNextChapter}
-        >
+        <ButtonItem onClick={handleNextChapter}>
           Next
         </ButtonItem>
       </div>
@@ -258,3 +226,4 @@ export default definePlugin(() => {
     icon: <FaBible />,
   };
 });
+

@@ -17,6 +17,12 @@ const Content = () => {
   // Create a ref object for each verse
   const verseRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
+  // Speech Synthesis handler
+  //const readVerseAloud = (text: string) => {
+    //const speech = new SpeechSynthesisUtterance(text);
+    //window.speechSynthesis.speak(speech);
+  //};
+
   // Handle Next Chapter button click
   const handleNextChapter = () => {
     if (selectedBook && selectedChapter) {
@@ -36,30 +42,6 @@ const Content = () => {
 
   return (
     <div style={{ padding: '20px' }}>
-      {/* Conditionally render the red update notification */}
-      {updateAvailable && (
-        <div
-          style={{
-            position: 'absolute', // Fixed position to ensure it stays at the top
-            top: '20px',          // Space from the top of the page
-            left: '50%',          // Center horizontally
-            transform: 'translateX(-50%)',  // Offset by half its width to center
-            backgroundColor: 'red',  // Red background for the notification box
-            color: 'white',       // White text color
-            padding: '1em',       // Padding inside the notification box
-            borderRadius: '8px',  // Rounded corners for the box
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // Shadow effect for depth
-            maxWidth: '80%',      // Limit the width of the box
-            margin: 'auto',       // Ensure it stays centered
-            textAlign: 'center',  // Center the text inside the box
-            fontWeight: 'bold',    // Make the text bold
-            zIndex: 10,           // Make sure it overlays the content
-          }}
-        >
-          A new update is available! Please update your plugin :)
-        </div>
-      )}
-
       {/* Verse of the Day Section - Only on Page 0 */}
       {page === 0 && verseOfTheDay && (
         <div 
@@ -68,8 +50,31 @@ const Content = () => {
             background: '#f9f9f9', 
             padding: '30px 10px 10px 10px', // Add padding on top to make space for the notification
             borderRadius: '5px',
+            position: 'relative', // Position relative to allow absolute positioning of the notification
           }}
         >
+          {/* New Update Indicator - Now inside the Verse of the Day card */}
+          {updateAvailable && (
+            <div 
+              style={{
+                position: 'absolute',
+                top: '10px', // Adjust the distance from the top of the card
+                right: '10px', // Adjust the distance from the right of the card
+                backgroundColor: 'red', 
+                color: 'white', 
+                padding: '10px 20px',
+                borderRadius: '5px',
+                fontSize: '14px', 
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                zIndex: 10,
+              }}
+              onClick={() => alert('Update Available!')}
+            >
+              New Update Available!
+            </div>
+          )}
+
           <h2>Verse of the Day</h2>
           <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
@@ -99,6 +104,12 @@ const Content = () => {
             >
               Go To
             </ButtonItem>
+            {/* Read Aloud button */}
+            {/* <ButtonItem 
+              onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)} 
+            >
+              Read Aloud
+            </ButtonItem> */}
           </div>
         </div>
       )}
@@ -107,6 +118,7 @@ const Content = () => {
       {page === 0 && (
         <>
           <h1>Select a Book</h1>
+          {/* Wrap all books in one card container */}
           <div
             style={{
               backgroundColor: '#007bff', // Light background for the card
@@ -133,6 +145,7 @@ const Content = () => {
       {page === 1 && selectedBook && (
         <>
           <h1>Select a Chapter</h1>
+          {/* Wrap all chapters in one card container */}
           <div
             style={{
               backgroundColor: '#28a745',  // Green background for the card container
@@ -170,6 +183,7 @@ const Content = () => {
         <>
           <div style={{ marginBottom: '20px' }}>
             <h2>Select a Verse</h2>
+            {/* Wrap all verse buttons inside one card container */}
             <div
               style={{
                 backgroundColor: '#6f42c1',  // Purple background for the verse card container
@@ -181,7 +195,7 @@ const Content = () => {
             >
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px' }}>
                 {Object.keys(verses)
-                  .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`))
+                  .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`)) // Filter verses of the selected chapter
                   .map((verseKey) => (
                     <div 
                       key={verseKey}
@@ -190,9 +204,12 @@ const Content = () => {
                         borderRadius: '8px',         // Rounded corners
                         padding: '10px',             // Padding inside the card
                         margin: '5px',               // Margin between the cards
+                        textAlign: 'center',         // Center the text inside
                       }}
                     >
-                      <ButtonItem onClick={() => scrollToVerse(verseKey)}>
+                      <ButtonItem
+                        onClick={() => scrollToVerse(verseKey)} // Scroll to the selected verse
+                      >
                         {verseKey.split(':')[1]} {/* Display the verse number */}
                       </ButtonItem>
                     </div>
@@ -203,15 +220,42 @@ const Content = () => {
         </>
       )}
 
+      {/* Page 2 - Display Verses with Superscript Numbers */}
+      {page === 2 && selectedBook && selectedChapter && (
+        <>
+          <h1>{selectedBook} Chapter {selectedChapter}</h1>
+          <div
+            style={{
+              maxHeight: '500px',  // Adjust this height as needed
+              overflowY: 'auto',  // Enable vertical scrolling only for verses
+            }}
+          >
+            {Object.keys(verses)
+              .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`))
+              .map((verseKey) => (
+                <div key={verseKey} style={{ marginBottom: '10px' }} ref={(el) => verseRefs.current[verseKey] = el}>
+                  <p>
+                    <sup style={{ color: '#6f42c1', fontSize: '14px' }}>{verseKey.split(':')[1]}</sup> {verses[verseKey]}
+                  </p>
+                </div>
+              ))}
+          </div>
+        </>
+      )}
+
       {/* Pagination Controls */}
       <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '20px' }}>
+        {/* Previous Button */}
         <ButtonItem
           onClick={() => setPage(page - 1)}
           disabled={page === 0}
         >
           Previous
         </ButtonItem>
-        <ButtonItem onClick={handleNextChapter}>
+        {/* Next Button */}
+        <ButtonItem
+          onClick={handleNextChapter}
+        >
           Next
         </ButtonItem>
       </div>
@@ -226,4 +270,3 @@ export default definePlugin(() => {
     icon: <FaBible />,
   };
 });
-

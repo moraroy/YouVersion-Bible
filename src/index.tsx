@@ -36,23 +36,23 @@ const Content = () => {
 
   return (
     <div style={{ padding: '20px' }}>
-      {/* New Update Indicator - Outside the Verse of the Day card */}
+      {/* New Update Indicator - Centered red notification box */}
       {updateAvailable && (
         <div 
           style={{
-            position: 'fixed', // Fix it to the top of the page
-            top: '10px', // Space from the top
-            right: '10px', // Space from the right
+            position: 'absolute', // Position relative to the page
+            top: '20px', // Space from the top
+            left: '50%', // Center horizontally
+            transform: 'translateX(-50%)', // Offset by half the width to truly center
             backgroundColor: 'red', 
             color: 'white', 
             padding: '10px 20px',
             borderRadius: '5px',
-            fontSize: '14px', 
+            fontSize: '16px', 
             fontWeight: 'bold',
-            cursor: 'pointer',
+            textAlign: 'center', // Center text inside the notification
             zIndex: 10,
           }}
-          onClick={() => alert('Update Available!')}
         >
           New Update Available!
         </div>
@@ -232,7 +232,7 @@ const Content = () => {
       )}
 
       {/* Pagination Controls */}
-      <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '20px' }}>
         {/* Previous Button */}
         <ButtonItem
           onClick={() => setPage(page - 1)}

@@ -26,8 +26,13 @@ const Content = () => {
 
   // Scroll to the selected verse when a purple button is clicked
   const scrollToVerse = (verseKey: string) => {
-    if (verseRefs.current[verseKey]) {
-      verseRefs.current[verseKey]?.scrollIntoView({ behavior: 'smooth' });
+    // Normalize citation format: remove any spaces
+    const normalizedCitation = verseKey.replace(/\s+/g, '');
+    
+    if (verseRefs.current[normalizedCitation]) {
+      verseRefs.current[normalizedCitation]?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      console.error(`Verse key ${normalizedCitation} not found`);
     }
   };
 

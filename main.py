@@ -99,6 +99,7 @@ class Plugin:
                 await ws.send_json({"error": "Internal error"})
             finally:
                 await ws.close()
+            return ws
 
         # WebSocket handler to send VOTD data
         async def handle_votd_ws(request):
@@ -117,6 +118,7 @@ class Plugin:
                 await ws.send_json({"error": "Internal error"})
             finally:
                 await ws.close()
+            return ws
 
         # Define the fetch_data function using requests inside _main
         async def fetch_data():

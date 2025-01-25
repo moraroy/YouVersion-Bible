@@ -2,26 +2,20 @@ import { definePlugin, ButtonItem } from "decky-frontend-lib";
 import { useState, useRef } from "react";
 import { FaBible } from "react-icons/fa";
 import { useVOTD } from './getVOTD';  
-import { useUpdateInfo } from './getUpdate'; // Import the custom useUpdateInfo hook
+import { useUpdateInfo } from './getUpdate';
 import books from './books.json';    
 import verses from './verses.json';  
 
 // Content component displaying Verse of the Day
 const Content = () => {
   const { verseOfTheDay } = useVOTD();
-  const { updateInfo } = useUpdateInfo();  // Use the custom hook for update info
+  const { updateInfo } = useUpdateInfo();
   const [page, setPage] = useState(0);  
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
 
   // Create a ref object for each verse
   const verseRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-
-  // Speech Synthesis handler
-  //const readVerseAloud = (text: string) => {
-    //const speech = new SpeechSynthesisUtterance(text);
-    //window.speechSynthesis.speak(speech);
-  //};
 
   // Handle Next Chapter button click
   const handleNextChapter = () => {
@@ -42,43 +36,40 @@ const Content = () => {
 
   return (
     <div style={{ padding: '20px' }}>
+      {/* New Update Indicator */}
+      {updateAvailable && (
+        <div 
+          style={{
+            backgroundColor: 'red', 
+            color: 'white', 
+            padding: '10px 20px',
+            borderRadius: '5px',
+            fontSize: '14px', 
+            fontWeight: 'bold',
+            marginBottom: '20px',  // Add space below the update button
+            textAlign: 'center',   // Center the text
+            cursor: 'pointer',     // Show pointer cursor on hover
+          }}
+          onClick={() => alert('Update Available!')}
+        >
+          New Update Available!
+        </div>
+      )}
+
       {/* Verse of the Day Section - Only on Page 0 */}
       {page === 0 && verseOfTheDay && (
         <div 
           style={{
             marginBottom: '20px', 
             background: '#f9f9f9', 
-            padding: '30px 10px 10px 10px', // Add padding on top to make space for the notification
+            padding: '30px 10px 10px 10px', 
             borderRadius: '5px',
-            position: 'relative', // Position relative to allow absolute positioning of the notification
           }}
         >
-          {/* New Update Indicator - Now inside the Verse of the Day card */}
-          {updateAvailable && (
-            <div 
-              style={{
-                position: 'absolute',
-                top: '10px', // Adjust the distance from the top of the card
-                right: '10px', // Adjust the distance from the right of the card
-                backgroundColor: 'red', 
-                color: 'white', 
-                padding: '10px 20px',
-                borderRadius: '5px',
-                fontSize: '14px', 
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                zIndex: 10,
-              }}
-              onClick={() => alert('Update Available!')}
-            >
-              New Update Available!
-            </div>
-          )}
-
           <h2>Verse of the Day</h2>
           <p><strong>{verseOfTheDay.citation}</strong></p>
           <p>{verseOfTheDay.passage}</p>
-          <p><em>Version: {verseOfTheDay.version}</em></p> {/* Display Version */}
+          <p><em>Version: {verseOfTheDay.version}</em></p>
 
           {/* Display Images if available */}
           {verseOfTheDay.images && verseOfTheDay.images.length > 0 && (
@@ -104,12 +95,6 @@ const Content = () => {
             >
               Go To
             </ButtonItem>
-            {/* Read Aloud button */}
-            {/* <ButtonItem 
-              onClick={() => readVerseAloud(`${verseOfTheDay.citation}: ${verseOfTheDay.passage}`)} 
-            >
-              Read Aloud
-            </ButtonItem> */}
           </div>
         </div>
       )}
@@ -244,7 +229,7 @@ const Content = () => {
       )}
 
       {/* Pagination Controls */}
-      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '20px' }}>
+      <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
         {/* Previous Button */}
         <ButtonItem
           onClick={() => setPage(page - 1)}

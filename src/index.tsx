@@ -1,5 +1,5 @@
 import { definePlugin, ButtonItem } from "decky-frontend-lib";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FaBible } from "react-icons/fa";
 import { useVOTD } from './getVOTD';  
 import { useUpdateInfo } from './getUpdate';
@@ -14,6 +14,7 @@ const Content = () => {
   const [page, setPage] = useState(0);  
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
+  const [selectedVerseKey, setSelectedVerseKey] = useState<string | null>(null);
 
   const verseRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const scrollRef = scrollableRef();
@@ -29,6 +30,12 @@ const Content = () => {
       verseRefs.current[verseKey]?.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  useEffect(() => {
+    if (page === 3 && selectedVerseKey) {
+      setTimeout(() => scrollToVerse(selectedVerseKey), 100);
+    }
+  }, [page, selectedVerseKey]);
 
   const updateAvailable = updateInfo?.status === "Update available";
 
@@ -184,7 +191,10 @@ const Content = () => {
                       }}
                     >
                       <ButtonItem
-                        onClick={() => scrollToVerse(verseKey)}
+                        onClick={() => {
+                          setSelectedVerseKey(verseKey);
+                          setPage(3);
+                        }}
                       >
                         {verseKey.split(':')[1]}
                       </ButtonItem>
@@ -196,7 +206,7 @@ const Content = () => {
         </>
       )}
 
-      {page === 2 && selectedBook && selectedChapter && (
+      {page === 3 && selectedBook && selectedChapter && (
         <>
           <h1>{selectedBook} Chapter {selectedChapter}</h1>
           <Scrollable ref={scrollRef}>

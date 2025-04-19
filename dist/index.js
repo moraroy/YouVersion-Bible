@@ -31815,6 +31815,7 @@
       const [page, setPage] = React.useState(0);
       const [selectedBook, setSelectedBook] = React.useState(null);
       const [selectedChapter, setSelectedChapter] = React.useState(null);
+      const [selectedVerseKey, setSelectedVerseKey] = React.useState(null);
       const verseRefs = React.useRef({});
       const scrollRef = scrollableRef();
       const handleNextChapter = () => {
@@ -31827,6 +31828,11 @@
               verseRefs.current[verseKey]?.scrollIntoView({ behavior: 'smooth' });
           }
       };
+      React.useEffect(() => {
+          if (page === 3 && selectedVerseKey) {
+              setTimeout(() => scrollToVerse(selectedVerseKey), 100);
+          }
+      }, [page, selectedVerseKey]);
       const updateAvailable = updateInfo?.status === "Update available";
       return (window.SP_REACT.createElement("div", { style: { padding: '20px' } },
           page === 0 && verseOfTheDay && (window.SP_REACT.createElement("div", { style: {
@@ -31910,8 +31916,11 @@
                               margin: '5px',
                               textAlign: 'center',
                           } },
-                          window.SP_REACT.createElement(deckyFrontendLib.ButtonItem, { onClick: () => scrollToVerse(verseKey) }, verseKey.split(':')[1]))))))))),
-          page === 2 && selectedBook && selectedChapter && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
+                          window.SP_REACT.createElement(deckyFrontendLib.ButtonItem, { onClick: () => {
+                                  setSelectedVerseKey(verseKey);
+                                  setPage(3);
+                              } }, verseKey.split(':')[1]))))))))),
+          page === 3 && selectedBook && selectedChapter && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
               window.SP_REACT.createElement("h1", null,
                   selectedBook,
                   " Chapter ",

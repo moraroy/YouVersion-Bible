@@ -31753,33 +31753,80 @@
   	"Revelation 22:21": "The grace of our Lord Jesus Christ [be] with you all. Amen."
   };
 
-  // Content component displaying Verse of the Day
+  const DEFAULTSCROLLSPEED = 50;
+  function scrollableRef() {
+      return React.useRef(null);
+  }
+  const Scrollable = React__default["default"].forwardRef((props, ref) => {
+      props.style = {
+          height: "95vh",
+          overflowY: "scroll",
+          ...props.style,
+      };
+      return window.SP_REACT.createElement("div", { ref: ref, ...props });
+  });
+  const scrollOnDirection = (e, ref, amt, prev, next) => {
+      let childNodes = ref.current?.childNodes;
+      let currentIndex = null;
+      childNodes?.forEach((node, i) => {
+          if (node === e.currentTarget)
+              currentIndex = i;
+      });
+      let pos = e.currentTarget?.getBoundingClientRect();
+      let out = ref.current?.getBoundingClientRect();
+      if (e.detail.button === deckyFrontendLib.GamepadButton.DIR_DOWN) {
+          if (out?.bottom !== undefined &&
+              pos.bottom <= out.bottom &&
+              currentIndex !== null &&
+              currentIndex + 1 < (childNodes?.length || 0)) {
+              next.current?.focus();
+          }
+          else {
+              ref.current?.scrollBy({ top: amt, behavior: "smooth" });
+          }
+      }
+      else if (e.detail.button === deckyFrontendLib.GamepadButton.DIR_UP) {
+          if (out?.top !== undefined &&
+              pos.top >= out.top &&
+              currentIndex !== null &&
+              currentIndex - 1 >= 0) {
+              prev.current?.focus();
+          }
+          else {
+              ref.current?.scrollBy({ top: -amt, behavior: "smooth" });
+          }
+      }
+  };
+  const ScrollArea = (props) => {
+      const scrollSpeed = props.scrollSpeed ?? DEFAULTSCROLLSPEED;
+      const prevFocus = React.useRef(null);
+      const nextFocus = React.useRef(null);
+      props.onActivate = (e) => e.currentTarget?.focus();
+      props.onGamepadDirection = (e) => scrollOnDirection(e, props.scrollable, scrollSpeed, prevFocus, nextFocus);
+      return (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
+          window.SP_REACT.createElement(deckyFrontendLib.Focusable, { ref: prevFocus, children: [], onActivate: () => { } }),
+          window.SP_REACT.createElement(deckyFrontendLib.Focusable, { ...props }),
+          window.SP_REACT.createElement(deckyFrontendLib.Focusable, { ref: nextFocus, children: [], onActivate: () => { } })));
+  };
+
   const Content = () => {
       const { verseOfTheDay } = useVOTD();
-      const { updateInfo } = useUpdateInfo(); // Use the custom hook for update info
+      const { updateInfo } = useUpdateInfo();
       const [page, setPage] = React.useState(0);
       const [selectedBook, setSelectedBook] = React.useState(null);
       const [selectedChapter, setSelectedChapter] = React.useState(null);
-      // Create a ref object for each verse
       const verseRefs = React.useRef({});
-      // Speech Synthesis handler
-      //const readVerseAloud = (text: string) => {
-      //const speech = new SpeechSynthesisUtterance(text);
-      //window.speechSynthesis.speak(speech);
-      //};
-      // Handle Next Chapter button click
+      const scrollRef = scrollableRef();
       const handleNextChapter = () => {
           if (selectedBook && selectedChapter) {
               setPage(2);
           }
       };
-      // Scroll to the selected verse when a purple button is clicked
       const scrollToVerse = (verseKey) => {
           if (verseRefs.current[verseKey]) {
               verseRefs.current[verseKey]?.scrollIntoView({ behavior: 'smooth' });
           }
       };
-      // Check if an update is available based on the status
       const updateAvailable = updateInfo?.status === "Update available";
       return (window.SP_REACT.createElement("div", { style: { padding: '20px' } },
           page === 0 && verseOfTheDay && (window.SP_REACT.createElement("div", { style: {
@@ -31787,7 +31834,7 @@
                   background: '#f9f9f9',
                   padding: '30px 10px 10px 10px',
                   borderRadius: '5px',
-                  position: 'relative', // Position relative to allow absolute positioning of the notification
+                  position: 'relative',
               } },
               updateAvailable && (window.SP_REACT.createElement("div", { style: {
                       position: 'absolute',
@@ -31810,7 +31857,6 @@
                   window.SP_REACT.createElement("em", null,
                       "Version: ",
                       verseOfTheDay.version)),
-              " ",
               verseOfTheDay.images && verseOfTheDay.images.length > 0 && (window.SP_REACT.createElement("div", { style: { marginTop: '20px' } },
                   window.SP_REACT.createElement("h3", null, "Images for Verse of the Day"),
                   window.SP_REACT.createElement("div", { style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } }, verseOfTheDay.images.map((image, index) => (window.SP_REACT.createElement("img", { key: index, src: image, alt: `Image for ${verseOfTheDay.citation}`, style: { width: '100px', height: 'auto', borderRadius: '5px' } })))))),
@@ -31823,7 +31869,7 @@
                       borderRadius: '10px',
                       padding: '20px',
                       margin: '10px',
-                      boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', // Optional shadow for the card
+                      boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
                   } },
                   window.SP_REACT.createElement("div", { style: { display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '10px' } }, books$1.books.map((book) => (window.SP_REACT.createElement("div", { key: book.book, style: { backgroundColor: '#007bff', borderRadius: '8px', padding: '10px', margin: '5px' } },
                       window.SP_REACT.createElement(deckyFrontendLib.ButtonItem, { onClick: () => { setSelectedBook(book.book); setPage(1); } }, book.book)))))))),
@@ -31834,13 +31880,13 @@
                       borderRadius: '10px',
                       padding: '20px',
                       margin: '10px',
-                      boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', // Optional shadow for the card
+                      boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
                   } },
                   window.SP_REACT.createElement("div", { style: { display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '10px' } }, Array.from({ length: books$1.books.find(book => book.book === selectedBook)?.chapters || 0 }, (_, index) => (window.SP_REACT.createElement("div", { key: index + 1, style: {
                           backgroundColor: '#28a745',
                           borderRadius: '8px',
                           padding: '10px',
-                          margin: '5px', // Margin between the buttons
+                          margin: '5px',
                       } },
                       window.SP_REACT.createElement(deckyFrontendLib.ButtonItem, { onClick: () => { setSelectedChapter(index + 1); setPage(2); } },
                           "Chapter ",
@@ -31853,35 +31899,31 @@
                           borderRadius: '10px',
                           padding: '20px',
                           margin: '10px',
-                          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', // Optional shadow for the card
+                          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
                       } },
                       window.SP_REACT.createElement("div", { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px' } }, Object.keys(verses)
-                          .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`)) // Filter verses of the selected chapter
+                          .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`))
                           .map((verseKey) => (window.SP_REACT.createElement("div", { key: verseKey, style: {
                               backgroundColor: '#6f42c1',
                               borderRadius: '8px',
                               padding: '10px',
                               margin: '5px',
-                              textAlign: 'center', // Center the text inside
+                              textAlign: 'center',
                           } },
-                          window.SP_REACT.createElement(deckyFrontendLib.ButtonItem, { onClick: () => scrollToVerse(verseKey) },
-                              verseKey.split(':')[1],
-                              " "))))))))),
+                          window.SP_REACT.createElement(deckyFrontendLib.ButtonItem, { onClick: () => scrollToVerse(verseKey) }, verseKey.split(':')[1]))))))))),
           page === 2 && selectedBook && selectedChapter && (window.SP_REACT.createElement(window.SP_REACT.Fragment, null,
               window.SP_REACT.createElement("h1", null,
                   selectedBook,
                   " Chapter ",
                   selectedChapter),
-              window.SP_REACT.createElement("div", { style: {
-                      maxHeight: '500px',
-                      overflowY: 'auto', // Enable vertical scrolling only for verses
-                  } }, Object.keys(verses)
-                  .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`))
-                  .map((verseKey) => (window.SP_REACT.createElement("div", { key: verseKey, style: { marginBottom: '10px' }, ref: (el) => verseRefs.current[verseKey] = el },
-                  window.SP_REACT.createElement("p", null,
-                      window.SP_REACT.createElement("sup", { style: { color: '#6f42c1', fontSize: '14px' } }, verseKey.split(':')[1]),
-                      " ",
-                      verses[verseKey]))))))),
+              window.SP_REACT.createElement(Scrollable, { ref: scrollRef },
+                  window.SP_REACT.createElement(ScrollArea, { scrollable: scrollRef }, Object.keys(verses)
+                      .filter((verseKey) => verseKey.startsWith(`${selectedBook} ${selectedChapter}:`))
+                      .map((verseKey) => (window.SP_REACT.createElement("div", { key: verseKey, style: { marginBottom: '10px' }, ref: (el) => verseRefs.current[verseKey] = el },
+                      window.SP_REACT.createElement("p", null,
+                          window.SP_REACT.createElement("sup", { style: { color: '#6f42c1', fontSize: '14px' } }, verseKey.split(':')[1]),
+                          " ",
+                          verses[verseKey])))))))),
           window.SP_REACT.createElement("div", { style: { marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' } },
               window.SP_REACT.createElement(deckyFrontendLib.ButtonItem, { onClick: () => setPage(page - 1), disabled: page === 0 }, "Previous"),
               window.SP_REACT.createElement(deckyFrontendLib.ButtonItem, { onClick: handleNextChapter }, "Next"))));

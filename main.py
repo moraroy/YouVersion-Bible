@@ -120,92 +120,83 @@ class Plugin:
                 await ws.close()
             return ws
 
-        # Define the fetch_data function using requests inside _main
         async def fetch_data():
             URL = "https://www.bible.com/en/verse-of-the-day"
             decky_plugin.logger.info(f"Fetching data from {URL}")
 
             loop = asyncio.get_event_loop()
             try:
-                # Use requests.get inside run_in_executor to run it in a separate thread
                 response = await loop.run_in_executor(None, requests.get, URL)
-                response.raise_for_status()  # Will raise an error for 4xx/5xx responses
-                decky_plugin.logger.info(f"Successfully fetched data from {URL}")
+                response.raise_for_status()
                 return response.text
             except requests.exceptions.RequestException as e:
                 decky_plugin.logger.error(f"Error fetching data: {e}")
                 return None
 
-        # Define the fetch_votd function to process the fetched data
         async def fetch_votd():
-            # Check if we already have VOTD data in cache
             if Plugin.votd_cache:
-                decky_plugin.logger.info("Returning cached VOTD data.")
                 return Plugin.votd_cache
 
-            # If cache is empty, fetch the data
             data = await fetch_data()
-            if data:
-                html_content = data
-                # Look for the __NEXT_DATA__ script tag
-                next_data_match = re.search(r'<script id="__NEXT_DATA__" type="application/json">(.+?)</script>', html_content, re.S)
-                if next_data_match:
-                    json_data = next_data_match.group(1)
-                    json_obj = json.loads(json_data)
-                    verse = json_obj['props']['pageProps']['verses'][0]['content'].replace('\n', ' ')
-                    reference = json_obj['props']['pageProps']['verses'][0]['reference']['human']
-                    version = json_obj['props']['pageProps']['versionData']['abbreviation']
+            if not data:
+                return {}
 
-                    image_urls = re.findall(r'<a class="block[^>]*><img src="([^"]+)"', html_content)
-                    image_array = [f"https://www.bible.com{src}" for src in image_urls]
+            html_content = data
 
-                    # Cache the fetched data inside the Plugin class
-                    Plugin.votd_cache = {
-                        'citation': reference,
-                        'passage': verse,
-                        'images': image_array,
-                        'version': version
-                    }
+            try:
+                json_data = html_content.split('<script id="__NEXT_DATA__" type="application/json">')[1].split('</script>')[0]
+                json_obj = json.loads(json_data)
 
-                    decky_plugin.logger.info("Fetched and cached new Verse of the Day")
-                    return Plugin.votd_cache
-                else:
-                    decky_plugin.logger.warning("Using the old way to extract data.")
-                    verses_array = []
-                    citations_array = []
-                    image_array = []
+                ref = json_obj['props']['pageProps']['votdVideo']['references'][0]
 
-                    verses_matches = re.findall(r'<a class="text-text-light w-full no-underline"[^>]*>(.+?)</a>', html_content, re.S)
-                    citations_matches = re.findall(r'<p class="text-gray-25">(.+?)</p>', html_content, re.S)
-                    images_matches = re.findall(r'<a class="block[^>]*><img src="([^"]+)"', html_content)
+                book_map = {
+                    "GEN": "Genesis", "EXO": "Exodus", "LEV": "Leviticus", "NUM": "Numbers", "DEU": "Deuteronomy",
+                    "JOS": "Joshua", "JDG": "Judges", "RUT": "Ruth", "1SA": "1 Samuel", "2SA": "2 Samuel",
+                    "1KI": "1 Kings", "2KI": "2 Kings", "1CH": "1 Chronicles", "2CH": "2 Chronicles",
+                    "EZR": "Ezra", "NEH": "Nehemiah", "EST": "Esther", "JOB": "Job", "PSA": "Psalms",
+                    "PRO": "Proverbs", "ECC": "Ecclesiastes", "SNG": "Song of Solomon", "ISA": "Isaiah",
+                    "JER": "Jeremiah", "LAM": "Lamentations", "EZK": "Ezekiel", "DAN": "Daniel",
+                    "HOS": "Hosea", "JOL": "Joel", "AMO": "Amos", "OBA": "Obadiah", "JON": "Jonah",
+                    "MIC": "Micah", "NAM": "Nahum", "HAB": "Habakkuk", "ZEP": "Zephaniah", "HAG": "Haggai",
+                    "ZEC": "Zechariah", "MAL": "Malachi", "MAT": "Matthew", "MRK": "Mark", "LUK": "Luke",
+                    "JHN": "John", "ACT": "Acts", "ROM": "Romans", "1CO": "1 Corinthians", "2CO": "2 Corinthians",
+                    "GAL": "Galatians", "EPH": "Ephesians", "PHP": "Philippians", "COL": "Colossians",
+                    "1TH": "1 Thessalonians", "2TH": "2 Thessalonians", "1TI": "1 Timothy", "2TI": "2 Timothy",
+                    "TIT": "Titus", "PHM": "Philemon", "HEB": "Hebrews", "JAS": "James", "1PE": "1 Peter",
+                    "2PE": "2 Peter", "1JN": "1 John", "2JN": "2 John", "3JN": "3 John", "JUD": "Jude", "REV": "Revelation",
+                }
 
-                    for citation in citations_matches:
-                        citation_text = citation.strip()
-                        version = citation_text[-4:].replace('(', '').replace(')', '')
-                        citation_text = citation_text[:-6]
-                        citations_array.append(citation_text)
-                        decky_plugin.logger.info(f"Citation: {citation_text}")
+                book_code = ref.split('.')[0]
+                book_name = book_map.get(book_code, book_code)
+                chapter = ref.split('.')[1]
+                verse = ref.split('.')[2]
 
-                    for verse in verses_matches:
-                        unformatted_verse = re.sub(r'\n', ' ', verse.strip())
-                        verses_array.append(unformatted_verse)
-                        decky_plugin.logger.info(f"Verse: {unformatted_verse}")
+                full_ref = f"{book_name} {chapter}:{verse}"
+                api_url = f"https://bible-api.com/{full_ref}?translation=kjv"
 
-                    image_array = [f"https://www.bible.com{src}" for src in images_matches]
-                    decky_plugin.logger.info(f"Images: {image_array}")
+                decky_plugin.logger.info(f"Fetching KJV from: {api_url}")
+                verse_response = requests.get(api_url)
+                verse_response.raise_for_status()
+                kjv_data = verse_response.json()
 
-                    # Cache the data even when fetched with the old way
-                    Plugin.votd_cache = {
-                        'citation': citations_array[0] if citations_array else '',
-                        'passage': verses_array[0] if verses_array else '',
-                        'images': image_array,
-                        'version': version
-                    }
+                verse_text = kjv_data.get("text", "").strip()
+                reference = kjv_data.get("reference", full_ref)
 
-                    return Plugin.votd_cache
+                image_urls = re.findall(r'<a class="block[^>]*><img src="([^"]+)"', html_content)
+                image_array = [f"https://www.bible.com{src}" for src in image_urls]
 
-            decky_plugin.logger.error("Failed to fetch the verse of the day.")
-            return {}
+                Plugin.votd_cache = {
+                    'citation': reference,
+                    'passage': verse_text,
+                    'images': image_array,
+                    'version': "KJV"
+                }
+
+                return Plugin.votd_cache
+
+            except Exception as e:
+                decky_plugin.logger.error(f"Failed to extract KJV VOTD: {e}")
+                return {}
 
         # Set up the web application
         app = web.Application()

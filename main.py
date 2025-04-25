@@ -27,9 +27,9 @@ class Plugin:
     votd_cache = {}  # Use a class-level variable to store cached data
     update_cache = {}  # New variable to cache update info
 
-
     async def _main(self):
         decky_plugin.logger.info("This is _main being called")
+        self.shutdown_event = asyncio.Event()
 
         async def fetch_github_version():
             github_url = "https://raw.githubusercontent.com/moraroy/YouVersion-Bible/main/package.json"
@@ -119,11 +119,8 @@ class Plugin:
                 return {}
 
             try:
-                # Extract the JSON data embedded in the HTML
                 json_data = data.split('<script id="__NEXT_DATA__" type="application/json">')[1].split('</script>')[0]
                 json_obj = json.loads(json_data)
-
-                # Check for verse data
                 verses = json_obj['props']['pageProps'].get('verses', None)
                 if verses:
                     verse_data = verses[0]
@@ -133,7 +130,6 @@ class Plugin:
                 else:
                     decky_plugin.logger.warning("Verse of the Day not found in expected keys.")
 
-                # If no verse found, try arrayOfVerses
                 if not verses and 'arrayOfVerses' in json_obj['props']['pageProps']:
                     array_of_verses = json_obj['props']['pageProps']['arrayOfVerses']
                     if array_of_verses:
@@ -142,16 +138,13 @@ class Plugin:
                         content = verse_data['content']
                         decky_plugin.logger.info(f"Fetched Verse of the Day from 'arrayOfVerses':\nReference: {reference}\nContent: {content}")
 
-                # If reference not found, log it
                 if not reference:
                     decky_plugin.logger.error("No reference found in the data!")
 
-                # Now use the book_map to translate the reference abbreviation to full name
                 if reference:
                     ref = reference.split(' ')[0]
                     decky_plugin.logger.info(f"Original reference: {ref}")
 
-                    # Map book abbreviation to full name
                     book_code = ref.split('.')[0]
                     book_map = {
                         "GEN": "Genesis", "EXO": "Exodus", "LEV": "Leviticus", "NUM": "Numbers", "DEU": "Deuteronomy",
@@ -170,16 +163,15 @@ class Plugin:
                         "2PE": "2 Peter", "1JN": "1 John", "2JN": "2 John", "3JN": "3 John", "JUD": "Jude", "REV": "Revelation",
                     }
 
+
                     book_name = book_map.get(book_code, book_code)
                     decky_plugin.logger.info(f"Mapped book abbreviation {book_code} to {book_name}")
 
-                    # Split reference and form full reference
                     chapter_verse = reference.split(' ')[1]
                     chapter, verse = chapter_verse.split(':')
                     full_ref = f"{book_name} {chapter}:{verse}"
                     decky_plugin.logger.info(f"Full reference constructed: {full_ref}")
 
-                    # Now fetch the KJV verse text
                     api_url = f"https://bible-api.com/{full_ref}?translation=kjv"
                     decky_plugin.logger.info(f"Fetching KJV text from: {api_url}")
 
@@ -191,12 +183,10 @@ class Plugin:
                     citation = kjv_data.get("reference", full_ref)
                     decky_plugin.logger.info(f"Fetched verse text: {verse_text}")
 
-                    # Extract images from the Bible page (if any)
                     image_urls = re.findall(r'<a class="block[^>]*><img src="([^"]+)"', data)
                     image_array = [f"https://www.bible.com{src}" for src in image_urls]
                     decky_plugin.logger.info(f"Found {len(image_array)} image(s)")
 
-                    # Store data in cache
                     Plugin.votd_cache = {
                         'citation': citation,
                         'passage': verse_text,
@@ -232,7 +222,6 @@ class Plugin:
 
             return ws
 
-
         # Set up the web application
         app = web.Application()
         app.router.add_get('/votd_ws', handle_votd_ws)
@@ -245,10 +234,24 @@ class Plugin:
         await site.start()
         decky_plugin.logger.info("Server started at http://localhost:8777")
 
-        # Keep the server running indefinitely
-        await asyncio.Event().wait()
+        # Handle server shutdown gracefully
+        shutdown_event = asyncio.Event()
+
 
     async def _unload(self):
         decky_plugin.logger.info("Plugin Unloaded!")
-        # Perform any necessary cleanup
-        pass
+
+        # Check if 'self.app' exists before attempting cleanup
+        if hasattr(self, 'app'):
+            decky_plugin.logger.info("Shutting down server...")
+
+            # Perform cleanup (clear cached data, etc.)
+            Plugin.votd_cache.clear()
+            Plugin.update_cache.clear()
+
+            # Trigger server cleanup (graceful shutdown)
+            self.shutdown_event.set()
+
+            # If the app exists, perform cleanup
+            await self.app.cleanup()  # Perform the cleanup for the app (graceful shutdown)
+            decky_plugin.logger.info("Server stopped and cleaned up.")
